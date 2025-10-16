@@ -110,6 +110,10 @@ const userMetadataSchema = new mongoose.Schema({
       },
     ],
   },
+  joinedCommunities: {
+    type: [String], // Array of community IDs
+    default: [],
+  },
   isActive: {
     type: Boolean,
     default: true,
