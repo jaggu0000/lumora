@@ -3,6 +3,7 @@ import { userDB } from "../../config/db.js";
 import User from "./User.js";
 import Task from "./Task.js";
 import CompletedTask from "./CompletedTask.js";
+import Community from "../CommunityDB/Community.js";
 
 const userMetadataSchema = new mongoose.Schema({
   userId: {
@@ -117,21 +118,20 @@ const userMetadataSchema = new mongoose.Schema({
     strict: true,
   },
   joinedCommunities: {
-    type: [String], // Array of community IDs
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Community",
     default: [],
   },
-  tasks: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Task",
-    },
-  ],
-  completedTasks: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "CompletedTask",
-    },
-  ],
+  tasks: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Task",
+    default: [],
+  },
+  completedTasks: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "CompletedTask",
+    default: [],
+  },
   isActive: {
     type: Boolean,
     default: true,
