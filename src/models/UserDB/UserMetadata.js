@@ -4,6 +4,7 @@ import User from "./User.js";
 import Task from "./Task.js";
 import CompletedTask from "./CompletedTask.js";
 import Community from "../CommunityDB/Community.js";
+import Achievement from "../AdminDB/Achievement.js";
 
 const userMetadataSchema = new mongoose.Schema({
   userId: {
@@ -90,32 +91,9 @@ const userMetadataSchema = new mongoose.Schema({
     min: [0, "Max streak count cannot be negative"],
   },
   achievements: {
-    type: [
-      {
-        name: {
-          type: String,
-          required: true,
-        },
-        date: {
-          type: Date,
-          default: Date.now,
-        },
-        iconUrl: {
-          type: String,
-          trim: true,
-          validate: {
-            validator: function (v) {
-              return /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg|webp))$/i.test(
-                v
-              );
-            },
-            message: (props) => `${props.value} is not a valid URL!`,
-          },
-        },
-      },
-    ],
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Achievement",
     default: [],
-    strict: true,
   },
   joinedCommunities: {
     type: [mongoose.Schema.Types.ObjectId],
