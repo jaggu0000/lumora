@@ -1,17 +1,6 @@
-import {
-  connectAdminDB,
-  connectCommunityDB,
-  connectUserDB,
-} from "./src/config/db.js";
+import { connectDatabases } from "./src/config/db.js";
 import env from "./src/config/env.js";
-import app from "./src/app.js"
-
-// Connect to all databases
-const connectDatabases = async () => {
-  await connectUserDB();
-  await connectCommunityDB();
-  await connectAdminDB();
-};
+import app from "./src/app.js";
 
 // Start server after database connections
 const startServer = async () => {

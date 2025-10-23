@@ -35,3 +35,10 @@ export const connectAdminDB = async () => {
     process.exit(1);
   }
 };
+
+// Connect to all databases
+export const connectDatabases = async () => {
+  await connectUserDB();
+  await connectCommunityDB();
+  await connectAdminDB();
+};
