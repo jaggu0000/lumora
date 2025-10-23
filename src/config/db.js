@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+import env from "./env.js";
 
 // Create separate connections for each database
 export const userDB = mongoose.createConnection();
@@ -7,7 +8,7 @@ export const adminDB = mongoose.createConnection();
 
 export const connectUserDB = async () => {
   try {
-    await userDB.openUri(process.env.CONNECTION_STRING_USER);
+    await userDB.openUri(env.CONNECTION_STRING_USER);
     console.log("User database connected successfully");
   } catch (error) {
     console.error("Error connecting to the user database", error);
@@ -17,7 +18,7 @@ export const connectUserDB = async () => {
 
 export const connectCommunityDB = async () => {
   try {
-    await communityDB.openUri(process.env.CONNECTION_STRING_COMMUNITY);
+    await communityDB.openUri(env.CONNECTION_STRING_COMMUNITY);
     console.log("Community database connected successfully");
   } catch (error) {
     console.error("Error connecting to the community database", error);
@@ -27,7 +28,7 @@ export const connectCommunityDB = async () => {
 
 export const connectAdminDB = async () => {
   try {
-    await adminDB.openUri(process.env.CONNECTION_STRING_ADMIN);    
+    await adminDB.openUri(env.CONNECTION_STRING_ADMIN);    
     console.log("Admin database connected successfully");
   } catch (error) {
     console.error("Error connecting to the admin database", error);

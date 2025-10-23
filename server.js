@@ -1,8 +1,11 @@
 import express from "express";
-import dotenv from "dotenv";
-import { connectAdminDB, connectCommunityDB, connectUserDB } from "./src/config/db.js";
+import {
+  connectAdminDB,
+  connectCommunityDB,
+  connectUserDB,
+} from "./src/config/db.js";
+import env from "./src/config/env.js";
 
-dotenv.config({ quiet: true });
 const app = express();
 
 // Connect to all databases
@@ -12,14 +15,12 @@ const connectDatabases = async () => {
   await connectAdminDB();
 };
 
-const PORT = process.env.PORT || 3000;
-
 // Start server after database connections
 const startServer = async () => {
   try {
     await connectDatabases();
-    app.listen(PORT, () => {
-      console.log(`Server is running on http://localhost:${PORT}`);
+    app.listen(env.SERVER_PORT, () => {
+      console.log(`Server is running on http://localhost:${env.SERVER_PORT}`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);
