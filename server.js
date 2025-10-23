@@ -1,12 +1,10 @@
-import express from "express";
 import {
   connectAdminDB,
   connectCommunityDB,
   connectUserDB,
 } from "./src/config/db.js";
 import env from "./src/config/env.js";
-
-const app = express();
+import app from "./src/app.js"
 
 // Connect to all databases
 const connectDatabases = async () => {
