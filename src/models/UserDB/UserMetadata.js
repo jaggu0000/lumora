@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import { userDB } from "../../config/db.js";
 import User from "./User.js";
 import Task from "./Task.js";
+import Timer from "./Timer.js";
 import CompletedTask from "./CompletedTask.js";
 import Community from "../CommunityDB/Community.js";
 import Achievement from "../AdminDB/Achievement.js";
@@ -103,6 +104,11 @@ const userMetadataSchema = new mongoose.Schema({
   tasks: {
     type: [mongoose.Schema.Types.ObjectId],
     ref: "Task",
+    default: [],
+  },
+  timers: {
+    type: [mongoose.Schema.Types.ObjectId],
+    ref: "Timer",
     default: [],
   },
   completedTasks: {
