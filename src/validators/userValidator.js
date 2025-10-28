@@ -75,4 +75,27 @@ const userRegistrationValidation = [
   },
 ];
 
+export const userLoginValidation = [
+  body("identifier")
+  .notEmpty()
+  .withMessage("Username or Email is Required!")
+  .bail(),
+
+  body("password")
+  .notEmpty()
+  .withMessage("Password is required!")
+  .bail(),
+
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({
+        success: false,
+        errors: errors.array(),
+      });
+    }
+    next();
+  },
+];
+
 export default userRegistrationValidation;
