@@ -1,6 +1,6 @@
 import User from "../models/UserDB/User.js";
 import bcrypt from "bcrypt";
-import {generateToken} from "../utils/tokenUtils.js"
+import { generateToken } from "../utils/tokenUtils.js";
 
 // Creates a new user in the User database
 export const addNewUser = async (data) => {
@@ -21,22 +21,20 @@ export const addNewUser = async (data) => {
 };
 
 //user login
-export const loginUser = async(identifier, password) => {
+export const loginUser = async (identifier, password) => {
   const user = await User.findOne({
-    $or: [{email: identifier}, {username: identifier}],
+    $or: [{ email: identifier }, { username: identifier }],
   }).select("+password"); //explicitly include the password
-  if (!user) throw new Error("Invalid Credentials");
-  // console.log(user)
+  if (!user) throw new Error("A user doesn't exist with this email or username");
 
   //compare password
   const isMatch = await bcrypt.compare(password, user.password);
-  console.log(isMatch)
-  if(!isMatch) throw new Error("Wrong Password");
+  if (!isMatch) throw new Error("Wrong Password");
 
   //generate token
   const token = generateToken(user);
-  return {user, token};
-}
+  return { user, token };
+};
 
 // Helper for validator
 //Checks if username already exist
