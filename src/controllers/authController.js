@@ -1,4 +1,4 @@
-import { addNewUser, loginUser } from "../services/userServices.js";
+import { addNewUser, loginUser } from "../services/authServices.js";
 
 // User Signup
 const addUser = async (req, res, next) => {
@@ -12,7 +12,6 @@ const addUser = async (req, res, next) => {
 export const login = async (req, res) => {
   try {
     const { identifier, password } = req.body;
-    // console.log(req.body);
     const { user, token } = await loginUser(identifier, password);
     res.status(201).json({
       success: true,

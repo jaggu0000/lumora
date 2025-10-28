@@ -2,7 +2,7 @@ import { body, validationResult } from "express-validator";
 import {
   checkUsernameExistence,
   checkEmailExistence,
-} from "../services/userServices.js";
+} from "../services/authServices.js";
 
 const userRegistrationValidation = [
   body("username")
