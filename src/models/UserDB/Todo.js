@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import { userDB } from "../../config/db.js";
 import User from "./User.js";
 
-const taskSchema = new mongoose.Schema(
+const todoSchema = new mongoose.Schema(
   {
     userId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -15,16 +15,14 @@ const taskSchema = new mongoose.Schema(
     },
     description: {
       type: String,
-      required: true,
     },
     dueDate: {
       type: Date,
-      required: true,
     }
   },
   { timestamps: true }
 );
 
-const Task = userDB.model("Task", taskSchema);
+const Todo = userDB.model("Todo", todoSchema);
 
-export default Task;
+export default Todo;

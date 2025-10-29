@@ -1,9 +1,9 @@
 import mongoose from "mongoose";
 import { userDB } from "../../config/db.js";
 import User from "./User.js";
-import Task from "./Task.js";
+import Todo from "./Todo.js";
 import Timer from "./Timer.js";
-import CompletedTask from "./CompletedTask.js";
+import CompletedTodo from "./CompletedTodo.js";
 import Community from "../CommunityDB/Community.js";
 import Achievement from "../AdminDB/Achievement.js";
 
@@ -101,9 +101,9 @@ const userMetadataSchema = new mongoose.Schema({
     ref: "Community",
     default: [],
   },
-  tasks: {
+  todos: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: "Task",
+    ref: "Todo",
     default: [],
   },
   timers: {
@@ -111,9 +111,9 @@ const userMetadataSchema = new mongoose.Schema({
     ref: "Timer",
     default: [],
   },
-  completedTasks: {
+  completedTodos: {
     type: [mongoose.Schema.Types.ObjectId],
-    ref: "CompletedTask",
+    ref: "CompletedTodo",
     default: [],
   },
   isActive: {

@@ -1,25 +1,55 @@
-import jwt from "jsonwebtoken";
 import env from "../config/env.js";
 import User from "../models/UserDB/User.js";
+import { verifyToken as verifyJwt } from "../utils/tokenUtils.js";
 
-export const verifyToken = async (req, res, next) => {
+export const authenticate = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    console.log(token);
+    // Try to get token from cookie first, then fall back to Authorization header
+    let token = req.cookies.token;
+    
     if (!token) {
-      return res.status(401).json({ message: "Token not provided" });
+      const auth = req.headers.authorization || "";
+      const [scheme, headerToken] = auth.split(" ");
+      if (scheme === "Bearer" && headerToken) {
+        token = headerToken;
+      }
     }
 
-    const decoded = jwt.verify(token, env.JWT_SECRET_KEY);
-    req.user = await User.findById(decoded.id);
-
-    if (!req.user) {
-      return res.status(404).json({ message: "User not found" });
+    if (!token) {
+      return res.status(401).json({
+        success: false,
+        message: "Token not provided",
+      });
     }
 
+    const { userId, role } = verifyJwt(token);
+    req.auth = { userId, role };
+
+    const user = await User.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
+    }
+
+    req.user = user;
     next();
   } catch (error) {
-    console.error("Token verification failed.", error);
-    return res.status(401).json({ message: "Invalid or expired token" });
+    console.error("Authentication failed:", error.message);
+    return res.status(401).json({
+      success: false,
+      message: "Invalid or expired token",
+    });
   }
+};
+
+export const isUser = (req, res, next) => {
+  if (req.auth.role !== "user") {
+    return res.status(403).json({
+      success: false,
+      message: "Forbidden: User access required",
+    });
+  }
+  next();
 };
