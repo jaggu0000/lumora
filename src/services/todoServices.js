@@ -1,3 +1,4 @@
+import Todo from "../models/UserDB/Todo.js";
 import Task from "../models/UserDB/Todo.js";
 import UserMetadata from "../models/UserDB/UserMetadata.js";
 
@@ -18,3 +19,19 @@ export const addNewTodo = async (data) => {
   
   return todo;
 };
+
+
+// Edit Todo
+export const editExistingTodo = async (data, todoId) => {
+    const todo = await Todo.findOne({ _id: todoId });
+    if(!todo) throw new Error("404 Todo not Found");
+    
+    const { title, description, dueDate } = data;
+    todo.title = title;
+    todo.description = description;
+    todo.dueDate = dueDate;
+
+    const editedTodo = await todo.save();
+    if(!editedTodo) throw new Error("Failed to edit Todo list");
+    return editedTodo;
+}
