@@ -1,9 +1,13 @@
 import express from "express";
 import { taskCreationValidation } from "../validators/todoValidator.js";
-import { addTodo } from "../controllers/todoController.js";
+import { addTodo, deleteTodo, editTodo } from "../controllers/todoController.js";
 
 const userRouter = express.Router();
 
-userRouter.post("/todo", taskCreationValidation, addTodo);
+// Task routes
+userRouter.post("/todo", taskCreationValidation, addTodo);  // Create Todo
+userRouter.route("/todo/:todoId")
+    .put(taskCreationValidation, editTodo)                  // Edit Todo
+    .delete(deleteTodo);                                    // Delete Todo
 
 export default userRouter;

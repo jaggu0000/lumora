@@ -1,4 +1,4 @@
-import { addNewTodo } from "../services/todoServices.js";
+import { addNewTodo, deleteExistingTodo, editExistingTodo } from "../services/todoServices.js";
 
 //Create todo
 export const addTodo = async (req, res) => {
@@ -10,4 +10,31 @@ export const addTodo = async (req, res) => {
   } catch (error) {
     res.status(401).json({ success: false, message: error.message });
   }
+};
+
+// Edit Todo
+export const editTodo = async(req, res) => {
+    try {
+        const { todoId } = req.params;
+        const { title, description, dueDate } = await editExistingTodo(req.body, todoId);
+        res.status(201).json({
+            status: "Success", data: { title, description, dueDate }
+        });
+    } catch (error) {
+        res.status(401).json({ success: false, message: error.message });
+    }
+}
+
+
+// Delete Todo
+export const deleteTodo = async (req, res) => {
+	try {
+		const { todoId } = req.params;
+		await deleteExistingTodo(todoId);
+		res.status(201).json({
+			status: "Success", message: "Todo deleted successfully"
+		});
+	} catch (error) {
+		res.status(401).json({ success: false, message: error.message });
+	}
 };
