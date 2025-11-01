@@ -2,6 +2,7 @@ import {
 	addNewTodo,
 	deleteExistingTodo,
 	editExistingTodo,
+	getAllTodoOfUser,
 } from "../services/todoServices.js";
 
 //Create todo
@@ -46,6 +47,16 @@ export const deleteTodo = async (req, res) => {
 			status: "Success",
 			message: "Todo deleted successfully",
 		});
+	} catch (error) {
+		res.status(401).json({ success: false, message: error.message });
+	}
+};
+
+// Get all Todos of a user
+export const getAllTodo = async (req, res) => {
+	try {
+		const todos = await getAllTodoOfUser(req.auth.userId);
+		res.status(200).json({ success: true, data: todos });
 	} catch (error) {
 		res.status(401).json({ success: false, message: error.message });
 	}

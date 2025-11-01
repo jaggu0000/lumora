@@ -4,12 +4,16 @@ import {
 	addTodo,
 	deleteTodo,
 	editTodo,
+	getAllTodo,
 } from "../controllers/todoController.js";
 
 const userRouter = express.Router();
 
 // Task routes
-userRouter.post("/todo", taskCreationValidation, addTodo); // Create Todo
+userRouter
+	.route("/todo")
+	.post(taskCreationValidation, addTodo) // Create Todo
+	.get(getAllTodo); // Get all Todos of a user
 userRouter
 	.route("/todo/:todoId")
 	.put(taskCreationValidation, editTodo) // Edit Todo

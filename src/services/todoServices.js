@@ -69,3 +69,10 @@ async function deleteTodoById (todoId) {
 	const deleted = await Todo.findByIdAndDelete(todoId);
 	if (!deleted) throw new Error("Failed to delete Todo");
 };
+
+// Get all Todos of a user
+export const getAllTodoOfUser = async (userId) => {
+	const userMetadata = await UserMetadata.findOne({ userId }).populate("todos");
+	if (!userMetadata) throw new Error("404 Todos not Found");
+	return userMetadata.todos ;
+}
