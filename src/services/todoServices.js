@@ -12,11 +12,16 @@ export const addNewTodo = async (data) => {
 
 	// Update UserMetadata
 	const newUserMetadata = await UserMetadata.findOne({ userId });
-	if (!newUserMetadata) throw new Error("Failed to find user metadata");
+	if (!newUserMetadata) {
+		deleteTodoById(todo._id);
+		throw new Error("Failed to find user metadata");
+	}
 	newUserMetadata.todos.push(todo._id);
 	const userMetadata = await newUserMetadata.save();
-	if (!userMetadata) throw new Error("Failed to create user metadata");
-
+	if (!userMetadata){
+		deleteTodoById(todo._id);
+		throw new Error("Failed to save todo in user metadata");
+	}
 	return todo;
 };
 
@@ -45,11 +50,10 @@ export const deleteExistingTodo = async (todoId) => {
 	await deleteTodoReference(todo.userId, todo._id);
 
 	// then delete the todo
-	const deleted = await Todo.findByIdAndDelete(todo._id);
-	if (!deleted) throw new Error("Failed to delete Todo");
+	await deleteTodoById(todo._id);
 };
 
-export const deleteTodoReference = async (userId, todoId) => {
+async function deleteTodoReference (userId, todoId) {
 	const userMetadata = await UserMetadata.findOne({ userId });
 	if (!userMetadata) throw new Error("404 UserMetadata not Found");
 
@@ -59,4 +63,9 @@ export const deleteTodoReference = async (userId, todoId) => {
 	const newUserMetadata = await userMetadata.save();
 	if (!newUserMetadata)
 		throw new Error("Failed to update newUserMetadata todo reference");
+};
+
+async function deleteTodoById (todoId) {
+	const deleted = await Todo.findByIdAndDelete(todoId);
+	if (!deleted) throw new Error("Failed to delete Todo");
 };
