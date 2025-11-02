@@ -22,6 +22,33 @@ export const createNewCommunity = async (communityData) => {
 
 // CommunityId existence check
 export const checkCommunityIdExistence = async (communityId) => {
-    const existingCommunity = await Community.findOne({ communityId });
-    return !!existingCommunity;
+	const existingCommunity = await Community.findOne({ communityId });
+	return !!existingCommunity;
+};
+
+// Add user to community
+export const addUserToCommunity = async (communityId, userId) => {
+	const community = await Community.findOne({ _id: communityId });
+	if (!community) throw new Error("Community not found");
+
+	const userMetadata = await UserMetadata.findOne({ userId });
+	if (!userMetadata) throw new Error("User metadata not found");
+
+	if (community.members.includes(userId))
+		throw new Error("User already a member of the community"); // Prevent duplicate entries
+
+	community.members.push(userId);
+	const updatedCommunity = await community.save();
+	if (!updatedCommunity) throw new Error("Failed to add user to community");
+
+	userMetadata.joinedCommunities.push(community._id);
+	const savedMetadata = await userMetadata.save();
+	if (!savedMetadata) {
+		await Community.updateOne(
+			{ _id: communityId },
+			{ $pull: { members: userId } }
+		);
+		throw new Error("Failed to update user metadata");
+	}
+	return updatedCommunity;
 };
