@@ -51,23 +51,20 @@ const communitySchema = new mongoose.Schema(
 			trim: true,
 			maxlength: [1000, "Rules must be less than 1000 characters long"],
 		},
-		members: [
-			{
-				type: [mongoose.Schema.Types.ObjectId],
-				ref: "User",
-			},
-		],
+		members: {
+			type: [mongoose.Schema.Types.ObjectId],
+			ref: "User",
+		},
+
 		communityAdmin: {
 			type: mongoose.Schema.Types.ObjectId,
 			ref: "User",
 			required: true,
 		},
-		moderators: [
-			{
-				type: [mongoose.Schema.Types.ObjectId],
-				ref: "User",
-			},
-		],
+		moderators: {
+			type: [mongoose.Schema.Types.ObjectId],
+			ref: "User",
+		},
 		isPrivate: {
 			type: Boolean,
 			default: false,
@@ -77,30 +74,25 @@ const communitySchema = new mongoose.Schema(
 			enum: ["open", "invite-only", "request-to-join"],
 			default: "open",
 		},
-		videoRooms: [
-			{
-				type: [mongoose.Schema.Types.ObjectId],
-				ref: "VideoRoom",
-			},
-		],
-		userReports: [
-			{
-				type: [mongoose.Schema.Types.ObjectId],
-				ref: "UserReport",
-			},
-		],
-		previousUsers: [
-			{
-				type: [mongoose.Schema.Types.ObjectId],
-				ref: "User",
-			},
-		],
-		blockedUsers: [
-			{
-				type: [mongoose.Schema.Types.ObjectId],
-				ref: "User",
-			},
-		],
+		videoRooms: {
+			type: [mongoose.Schema.Types.ObjectId],
+			ref: "VideoRoom",
+		},
+
+		userReports: {
+			type: [mongoose.Schema.Types.ObjectId],
+			ref: "UserReport",
+		},
+
+		previousUsers: {
+			type: [mongoose.Schema.Types.ObjectId],
+			ref: "User",
+		},
+
+		blockedUsers: {
+			type: [mongoose.Schema.Types.ObjectId],
+			ref: "User",
+		},
 	},
 	{ timestamps: true }
 );
