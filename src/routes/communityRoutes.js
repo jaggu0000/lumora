@@ -5,6 +5,6 @@ import { createCommunity } from "../controllers/communityController.js";
 const communityRouter = express.Router();
 
 // Create a new community
-communityRouter.post("/", communityCreationValidation, createCommunity);
+communityRouter.post("/create", communityCreationValidation, createCommunity);
 
 export default communityRouter;
