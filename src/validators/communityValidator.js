@@ -1,27 +1,27 @@
 import { body, validationResult } from "express-validator";
-import { checkCommunityIdExistence } from "../services/communityServices.js";
+import { checkCommunityTagExistence } from "../services/communityServices.js";
 
 export const communityCreationValidation = [
-	body("communityId")
+	body("communityTag")
 		.trim()
 		.notEmpty()
-		.withMessage("Community ID is required")
+		.withMessage("Community Tag is required")
 		.bail()
 		.isLength({ min: 3 })
-		.withMessage("Community ID must be at least 3 characters long")
+		.withMessage("Community Tag must be at least 3 characters long")
 		.bail()
 		.isLength({ max: 10 })
-		.withMessage("Community ID must be less than 10 characters long")
+		.withMessage("Community Tag must be less than 10 characters long")
 		.bail()
 		.matches(/^[a-z0-9_-]+$/i)
 		.withMessage(
-			"Community ID can only contain letters, numbers, underscores, and hyphens"
+			"Community Tag can only contain letters, numbers, underscores, and hyphens"
 		)
         .bail()
         .custom(async (value, { req }) => {
-            const exists = await checkCommunityIdExistence(value);
+            const exists = await checkCommunityTagExistence(value);
             if (exists) {
-                throw new Error("Community ID already exists");
+                throw new Error("Community Tag already exists");
             }
         }),
 

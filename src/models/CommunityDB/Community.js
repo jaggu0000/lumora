@@ -11,9 +11,9 @@ const communitySchema = new mongoose.Schema(
 			ref: "User",
 			required: true,
 		},
-		communityId: {
+		communityTag: {
 			type: String,
-			required: [true, "Community ID is required"],
+			required: [true, "Community Tag is required"],
 			unique: true,
 			trim: true,
 			match: [
