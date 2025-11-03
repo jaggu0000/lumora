@@ -9,10 +9,16 @@ export const createNewCommunity = async (communityData) => {
 	const userMetadata = await UserMetadata.findOne({
 		userId: savedCommunity.createdBy,
 	});
-	if (!userMetadata) throw new Error("User metadata not found");
+	if (!userMetadata) {
+		await Community.findByIdAndDelete(savedCommunity._id);
+		throw new Error("User metadata not found");
+	}
 	userMetadata.joinedCommunities.push(savedCommunity._id);
 	const savedMetadata = await userMetadata.save();
-	if (!savedMetadata) throw new Error("Failed to update user metadata");
+	if (!savedMetadata) {
+		await Community.findByIdAndDelete(savedCommunity._id);
+		throw new Error("Failed to update user metadata");
+	}
 	return savedCommunity;
 };
 
