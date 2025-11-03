@@ -4,10 +4,6 @@ import UserMetadata from "../models/UserDB/UserMetadata.js";
 // Create a new community
 export const createNewCommunity = async (communityData) => {
 	const newCommunity = new Community(communityData);
-	const existingCommunity = await Community.findOne({
-		communityId: communityData.communityId,
-	});
-	if (existingCommunity) throw new Error("CommunityId already exists");
 	const savedCommunity = await newCommunity.save();
 	if (!savedCommunity) throw new Error("Failed to create community");
 	const userMetadata = await UserMetadata.findOne({
@@ -20,9 +16,9 @@ export const createNewCommunity = async (communityData) => {
 	return savedCommunity;
 };
 
-// CommunityId existence check
-export const checkCommunityIdExistence = async (communityId) => {
-	const existingCommunity = await Community.findOne({ communityId });
+// CommunityTag existence check
+export const checkCommunityTagExistence = async (communityTag) => {
+	const existingCommunity = await Community.findOne({ communityTag });
 	return !!existingCommunity;
 };
 
