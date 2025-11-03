@@ -48,3 +48,17 @@ export const addUserToCommunity = async (communityId, userId) => {
 	}
 	return updatedCommunity;
 };
+
+// Delete community
+export const deleteCommunityIfAdmin = async (userId, communityId) => {
+	const community = await Community.findOne({ _id: communityId });
+	if (!community) throw new Error("Community not found");
+
+	// Check if the requesting user is the community admin
+	if (community.communityAdmin.toString() !== userId)
+		throw new Error("Only the community admin can delete the community");
+
+	const deletedCommunity = await Community.findByIdAndDelete(communityId);
+	if (!deletedCommunity) throw new Error("Failed to delete community");
+	return deletedCommunity;
+};

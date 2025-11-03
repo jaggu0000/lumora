@@ -1,6 +1,7 @@
 import {
 	addUserToCommunity,
 	createNewCommunity,
+	deleteCommunityIfAdmin,
 } from "../services/communityServices.js";
 
 // Create a new community
@@ -26,6 +27,18 @@ export const joinCommunity = async (req, res) => {
 		const userId = req.auth.userId;
 		await addUserToCommunity(communityId, userId);
 		res.status(200).json({ message: "Successfully joined the community" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Delete a community
+export const deleteCommunity = async (req, res) => {
+	try {
+		const { communityId } = req.params;
+		const userId = req.auth.userId;
+		await deleteCommunityIfAdmin(userId, communityId);
+		res.status(200).json({ message: "Community deleted successfully" });
 	} catch (error) {
 		res.status(500).json({ success: false, error: error.message });
 	}
