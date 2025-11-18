@@ -19,6 +19,13 @@ const todoSchema = new mongoose.Schema(
 		dueDate: {
 			type: Date,
 		},
+		isCompleted: {
+			type: Boolean,
+			default: false,
+		},
+		completedAt: {
+			type: Date,
+		}
 	},
 	{ timestamps: true }
 );

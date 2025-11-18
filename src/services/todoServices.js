@@ -76,3 +76,13 @@ export const getAllTodoOfUser = async (userId) => {
 	if (!userMetadata) throw new Error("404 Todos not Found");
 	return userMetadata.todos ;
 }
+
+// Mark Todo as completed
+export const markTodoAsCompleted = async (todoId) => {
+	const todo = await Todo.findById(todoId);
+	if(!todo) throw new Error("Todo does not exist");
+	todo.isCompleted = !todo.isCompleted;
+	todo.completedAt = Date.now();
+	const completedTodo = await todo.save();
+	if(!completedTodo) throw new Error("Failed to update complete status")
+};
