@@ -66,5 +66,12 @@ export const deleteCommunityIfAdmin = async (userId, communityId) => {
 
 	const deletedCommunity = await Community.findByIdAndDelete(communityId);
 	if (!deletedCommunity) throw new Error("Failed to delete community");
+
+	// Remove community id from joined community field of members' usermetadata
+	const editeduserMetadatas = await UserMetadata.updateMany(
+		{ userId: { $in: deletedCommunity.members } },
+		{ $pull: { joinedCommunities: deletedCommunity._id} }
+	);
+
 	return deletedCommunity;
 };
