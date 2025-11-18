@@ -58,3 +58,14 @@ export const login = async (req, res) => {
 		});
 	}
 };
+
+// User LogOut
+export const logout = async (req, res) => {
+	try {
+		// remove cookie
+		res.clearCookie("token");
+		res.end(); // Concludes the response
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
