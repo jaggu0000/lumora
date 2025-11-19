@@ -1,6 +1,12 @@
 import Community from "../models/CommunityDB/Community.js";
 import UserMetadata from "../models/UserDB/UserMetadata.js";
 
+// Check if the requesting user is the community admin
+export const checkIfCommunityAdmin = (community, userId) => {
+	if (community.communityAdmin.toString() !== userId)
+		throw new Error("Only the community admin can delete the community");
+};
+
 // Create a new community
 export const createNewCommunity = async (communityData) => {
 	const newCommunity = new Community(communityData);
@@ -60,9 +66,7 @@ export const deleteCommunityIfAdmin = async (userId, communityId) => {
 	const community = await Community.findOne({ _id: communityId });
 	if (!community) throw new Error("Community not found");
 
-	// Check if the requesting user is the community admin
-	if (community.communityAdmin.toString() !== userId)
-		throw new Error("Only the community admin can delete the community");
+	checkIfCommunityAdmin(community, userId);
 
 	const deletedCommunity = await Community.findByIdAndDelete(communityId);
 	if (!deletedCommunity) throw new Error("Failed to delete community");
