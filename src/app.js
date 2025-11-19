@@ -6,7 +6,7 @@ import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
 import { authenticate, isUser } from "./middlewares/authMiddleware.js";
 import env from "./config/env.js";
-import communityRouter from "./routes/communityRoutes.js";
+import { communityAdminRouter, communityRouter } from "./routes/communityRoutes.js";
 
 const app = express();
 
@@ -23,7 +23,8 @@ app.use(cookieParser());
 
 // User Routes
 app.use("/api/auth", authRouter);
+app.use("/api/user/community/admin", authenticate, isUser, communityAdminRouter);
 app.use("/api/user/community", authenticate, isUser, communityRouter);
 app.use("/api/user", authenticate, isUser, userRouter);
-
+	
 export default app;

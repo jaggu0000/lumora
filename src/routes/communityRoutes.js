@@ -2,17 +2,21 @@ import express from "express";
 import { communityCreationValidation } from "../validators/communityValidator.js";
 import {
 	changeCommunityAdmin,
+	addmoderator,
 	createCommunity,
 	deleteCommunity,
 	joinCommunity,
 } from "../controllers/communityController.js";
 
-const communityRouter = express.Router();
+const communityRouter = express.Router();  // community user routes
+const communityAdminRouter = express.Router(); //community admin routes
 
-// Create a new community
-communityRouter.post("/create", communityCreationValidation, createCommunity);
-communityRouter.post("/join/:communityId", joinCommunity);
-communityRouter.delete("/delete/:communityId", deleteCommunity);
+communityRouter.post("/create", communityCreationValidation, createCommunity); // Create a new community
+communityRouter.post("/join/:communityId", joinCommunity); // Join community
+communityRouter.delete("/delete/:communityId", deleteCommunity); // delete community
 communityRouter.put("/admin/transfer-admin/:communityId/:newAdminId", changeCommunityAdmin);
 
-export default communityRouter;
+// community admin routes
+communityAdminRouter.post("/add-moderator/:communityId/:moderatorId", addmoderator);
+
+export { communityAdminRouter, communityRouter };

@@ -75,7 +75,7 @@ export const deleteCommunityIfAdmin = async (userId, communityId) => {
 	// Remove community id from joined community field of members' usermetadata
 	const editeduserMetadatas = await UserMetadata.updateMany(
 		{ userId: { $in: deletedCommunity.members } },
-		{ $pull: { joinedCommunities: deletedCommunity._id} }
+		{ $pull: { joinedCommunities: deletedCommunity._id } }
 	);
 
 	return deletedCommunity;
@@ -83,13 +83,36 @@ export const deleteCommunityIfAdmin = async (userId, communityId) => {
 
 export const transferCommunityAdmin = async (communityId, userId, newAdminId) => {
 	const community = await Community.findOne({ _id: communityId });
-		if (!community) throw new Error("Community not found");
-
+	if (!community) throw new Error("Community not found");
+	
 	checkIfCommunityAdmin(community, userId);
-
+	
 	const newAdmin = await User.findById(newAdminId);
-	if(!newAdmin) throw new error("Not a valid user id");
-
+	if (!newAdmin) throw new error("Not a valid user id");
+	
 	community.communityAdmin = newAdminId;
 	community.save();
+};
+
+// add new moderator
+export const addNewModerator = async (communityId, userId, moderatorId) => {
+	const community = await Community.findById(communityId);
+	if (!community) throw new Error("Community not found");
+	
+	checkIfCommunityAdmin(community, userId);
+	
+	const newModerator = await User.findById(moderatorId);
+	if (!newModerator) throw new Error("moderatorId is not a valid userId");
+	
+	//checks if moderator is a member
+	if (!community.members.some(id => id.toString() === moderatorId.toString())) 
+		throw new Error("The user is not a member in the community")
+
+	//adds to moderator array (if not included)
+	if (!community.moderators.some(id => id.toString() === moderatorId.toString()))
+		community.moderators.push(moderatorId);
+	else
+		throw new Error("User is already a moderator");
+	
+	await community.save();
 };
