@@ -24,7 +24,7 @@ export const createCommunity = async (req, res) => {
 export const joinCommunity = async (req, res) => {
 	try {
 		const { communityId } = req.params;
-		const userId = req.auth.userId;
+		const { userId } = req.auth;
 		await addUserToCommunity(communityId, userId);
 		res.status(200).json({ message: "Successfully joined the community" });
 	} catch (error) {
@@ -36,7 +36,7 @@ export const joinCommunity = async (req, res) => {
 export const deleteCommunity = async (req, res) => {
 	try {
 		const { communityId } = req.params;
-		const userId = req.auth.userId;
+		const { userId } = req.auth;
 		await deleteCommunityIfAdmin(userId, communityId);
 		res.status(200).json({ message: "Community deleted successfully" });
 	} catch (error) {
