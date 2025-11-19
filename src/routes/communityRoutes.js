@@ -1,6 +1,7 @@
 import express from "express";
 import { communityCreationValidation } from "../validators/communityValidator.js";
 import {
+	changeCommunityAdmin,
 	createCommunity,
 	deleteCommunity,
 	joinCommunity,
@@ -12,5 +13,6 @@ const communityRouter = express.Router();
 communityRouter.post("/create", communityCreationValidation, createCommunity);
 communityRouter.post("/join/:communityId", joinCommunity);
 communityRouter.delete("/delete/:communityId", deleteCommunity);
+communityRouter.put("/admin/transfer-admin/:communityId/:newAdminId", changeCommunityAdmin);
 
 export default communityRouter;
