@@ -117,7 +117,7 @@ export const transferCommunityAdmin = async (communityId, userId, newAdminId) =>
 	if (!community.members.some((id) => id.toString() === newAdminId.toString())) throw new Error("The user is not a member in the community");
 
 	community.communityAdmin = newAdminId;
-	community.save();
+	await community.save();
 };
 
 // add new moderator
