@@ -3,6 +3,7 @@ import {
 	addUserToCommunity,
 	createNewCommunity,
 	deleteCommunityIfAdmin,
+	removeUserFromMembers,
 	transferCommunityAdmin,
 } from "../services/communityServices.js";
 
@@ -30,6 +31,18 @@ export const joinCommunity = async (req, res) => {
 		const { userId } = req.auth;
 		await addUserToCommunity(communityId, userId);
 		res.status(200).json({ message: "Successfully joined the community" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Leave a community
+export const leaveCommunity = async (req, res) => {
+	try {
+		const { communityId } = req.params;
+		const { userId } = req.auth;
+		await removeUserFromMembers(userId, communityId);
+		res.status(200).json({ message: "Successfully left the community" });
 	} catch (error) {
 		res.status(500).json({ success: false, error: error.message });
 	}
