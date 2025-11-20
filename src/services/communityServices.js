@@ -62,6 +62,27 @@ export const addUserToCommunity = async (communityId, userId) => {
 	return updatedCommunity;
 };
 
+// Remove user from community members
+export const removeUserFromMembers = async (userId, communityId) => {
+	const community = await Community.findById(communityId);
+	if (!community) throw new Error("Community not found");
+	
+	if (community.communityAdmin.toString() === userId) 	// checks if user is the community admin
+		throw new Error("Admin cannot leave the community before transfering the community admin role");
+
+	if (!community.members.some((id) => id.toString() === userId.toString()))	// checks if the user is a member
+		throw new Error("User is not a member of the community");
+		
+	community.members = community.members.filter((id) => id.toString() !== userId.toString());	//filter out the user from members
+	
+	community.moderators = community.moderators.filter((id) => id.toString() !== userId.toString());	//filter out the user from moderators if they are
+	
+	if (!community.previousMembers.some(id => id.toString === userId.toString()))	//adds the userId to previous member list if doesn't exist
+		community.previousMembers.push(userId); 
+		
+	await community.save();
+};
+
 // Delete community
 export const deleteCommunityIfAdmin = async (userId, communityId) => {
 	const community = await Community.findOne({ _id: communityId });

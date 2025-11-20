@@ -84,7 +84,7 @@ const communitySchema = new mongoose.Schema(
 			ref: "UserReport",
 		},
 
-		previousUsers: {
+		previousMembers: {
 			type: [mongoose.Schema.Types.ObjectId],
 			ref: "User",
 		},
