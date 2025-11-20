@@ -14,16 +14,14 @@ export const communityCreationValidation = [
 		.withMessage("Community Tag must be less than 10 characters long")
 		.bail()
 		.matches(/^[a-z0-9_-]+$/i)
-		.withMessage(
-			"Community Tag can only contain letters, numbers, underscores, and hyphens"
-		)
-        .bail()
-        .custom(async (value, { req }) => {
-            const exists = await checkCommunityTagExistence(value);
-            if (exists) {
-                throw new Error("Community Tag already exists");
-            }
-        }),
+		.withMessage("Community Tag can only contain letters, numbers, underscores, and hyphens")
+		.bail()
+		.custom(async (value, { req }) => {
+			const exists = await checkCommunityTagExistence(value);
+			if (exists) {
+				throw new Error("Community Tag already exists");
+			}
+		}),
 
 	body("communityName")
 		.trim()
@@ -47,10 +45,7 @@ export const communityCreationValidation = [
 		.isLength({ max: 500 })
 		.withMessage("Description must be less than 500 characters long"),
 
-	body("communityRules")
-		.trim()
-		.isLength({ max: 1000 })
-		.withMessage("Community rules must be less than 1000 characters long"),
+	body("communityRules").trim().isLength({ max: 1000 }).withMessage("Community rules must be less than 1000 characters long"),
 
 	body("isPrivate")
 		.trim()

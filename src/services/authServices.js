@@ -33,8 +33,7 @@ export const loginUser = async (identifier, password) => {
 	const user = await User.findOne({
 		$or: [{ email: identifier }, { username: identifier }],
 	}).select("+password"); //explicitly include the password
-	if (!user)
-		throw new Error("A user doesn't exist with this email or username");
+	if (!user) throw new Error("A user doesn't exist with this email or username");
 
 	//compare password
 	const isMatch = await bcrypt.compare(password, user.password);

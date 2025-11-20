@@ -62,15 +62,15 @@ export const deleteCommunity = async (req, res) => {
 
 // Transfer admin of a community
 export const changeCommunityAdmin = async (req, res) => {
-  try {
-    const { communityId } = req.params;
-    const { userId } = req.auth;
-    const { newAdminId } = req.params;
-    await transferCommunityAdmin(communityId, userId, newAdminId);
-    res.status(200).json({ message: "Admin transferred successfully" });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
+	try {
+		const { communityId } = req.params;
+		const { userId } = req.auth;
+		const { newAdminId } = req.params;
+		await transferCommunityAdmin(communityId, userId, newAdminId);
+		res.status(200).json({ message: "Admin transferred successfully" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
 };
 
 // Add moderator
@@ -79,8 +79,8 @@ export const addmoderator = async (req, res) => {
 		const { userId } = req.auth;
 		const { communityId, moderatorId } = req.params;
 		await addNewModerator(communityId, userId, moderatorId);
-		res.status(200).json({message: "Added moderator successfully"})
-	} catch (error){
+		res.status(200).json({ message: "Added moderator successfully" });
+	} catch (error) {
 		res.status(500).json({ success: false, error: error.message });
 	}
 };

@@ -13,17 +13,13 @@ export const taskCreationValidation = [
 		.custom((value) => {
 			const dueDate = new Date(value);
 			const now = new Date();
-			if (dueDate < now) {
-				throw new Error("Due date must be in the future");
-			}
+			if (dueDate < now) throw new Error("Due date must be in the future");
 			return true;
 		}),
 
 	(req, res, next) => {
 		const errors = validationResult(req);
-		if (!errors.isEmpty()) {
-			return res.status(400).json({ errors: errors.array() });
-		}
+		if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 		next();
 	},
 ];

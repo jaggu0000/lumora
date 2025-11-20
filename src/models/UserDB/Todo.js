@@ -25,7 +25,7 @@ const todoSchema = new mongoose.Schema(
 		},
 		completedAt: {
 			type: Date,
-		}
+		},
 	},
 	{ timestamps: true }
 );

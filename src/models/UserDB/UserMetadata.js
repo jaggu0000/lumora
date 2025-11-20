@@ -29,9 +29,7 @@ const userMetadataSchema = new mongoose.Schema({
 			trim: true,
 			validate: {
 				validator: function (v) {
-					return /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg|webp))$/i.test(
-						v
-					);
+					return /^(https?:\/\/.*\.(?:png|jpg|jpeg|gif|svg|webp))$/i.test(v);
 				},
 				message: (props) => `${props.value} is not a valid URL!`,
 			},
@@ -46,9 +44,7 @@ const userMetadataSchema = new mongoose.Schema({
 			trim: true,
 			validate: {
 				validator: function (v) {
-					return /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(\/[\w-]*)*\/?$/i.test(
-						v
-					);
+					return /^(https?:\/\/)?([\w-]+(\.[\w-]+)+)(\/[\w-]*)*\/?$/i.test(v);
 				},
 				message: (props) => `${props.value} is not a valid URL!`,
 			},
@@ -62,26 +58,17 @@ const userMetadataSchema = new mongoose.Schema({
 			linkedin: {
 				type: String,
 				trim: true,
-				match: [
-					/^(https?:\/\/)?(www\.)?linkedin\.com\/in\/[A-z0-9_-]+\/?$/,
-					"Not a valid LinkedIn URL!",
-				],
+				match: [/^(https?:\/\/)?(www\.)?linkedin\.com\/in\/[A-z0-9_-]+\/?$/, "Not a valid LinkedIn URL!"],
 			},
 			github: {
 				type: String,
 				trim: true,
-				match: [
-					/^(https?:\/\/)?(www\.)?github\.com\/[A-z0-9_-]+\/?$/,
-					"Not a valid GitHub URL!",
-				],
+				match: [/^(https?:\/\/)?(www\.)?github\.com\/[A-z0-9_-]+\/?$/, "Not a valid GitHub URL!"],
 			},
 			instagram: {
 				type: String,
 				trim: true,
-				match: [
-					/^(https?:\/\/)?(www\.)?instagram\.com\/[A-z0-9_.]+\/?$/,
-					"Not a valid Instagram URL!",
-				],
+				match: [/^(https?:\/\/)?(www\.)?instagram\.com\/[A-z0-9_.]+\/?$/, "Not a valid Instagram URL!"],
 			},
 		},
 	},

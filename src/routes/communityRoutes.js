@@ -9,7 +9,7 @@ import {
 	leaveCommunity,
 } from "../controllers/communityController.js";
 
-const communityRouter = express.Router();  // community user routes
+const communityRouter = express.Router(); // community user routes
 const communityAdminRouter = express.Router(); //community admin routes
 
 communityRouter.post("/create", communityCreationValidation, createCommunity); // Create a new community

@@ -26,5 +26,5 @@ app.use("/api/auth", authRouter);
 app.use("/api/user/community/admin", authenticate, isUser, communityAdminRouter);
 app.use("/api/user/community", authenticate, isUser, communityRouter);
 app.use("/api/user", authenticate, isUser, userRouter);
-	
+
 export default app;

@@ -1,5 +1,5 @@
 import { body, validationResult } from "express-validator";
-import {checkUsernameExistence, checkEmailExistence,} from "../services/authServices.js";
+import { checkUsernameExistence, checkEmailExistence } from "../services/authServices.js";
 
 export const userRegistrationValidation = [
 	body("username")
@@ -14,9 +14,7 @@ export const userRegistrationValidation = [
 		.withMessage("Username must be less than 20 characters long")
 		.bail()
 		.matches(/^[a-z0-9_]+$/i)
-		.withMessage(
-			"Username can only contain letters, numbers, and underscores"
-		)
+		.withMessage("Username can only contain letters, numbers, and underscores")
 		.bail()
 		.custom(async (value) => {
 			const exist = await checkUsernameExistence(value);
@@ -75,10 +73,7 @@ export const userRegistrationValidation = [
 ];
 
 export const userLoginValidation = [
-	body("identifier")
-		.notEmpty()
-		.withMessage("Username or Email is Required!")
-		.bail(),
+	body("identifier").notEmpty().withMessage("Username or Email is Required!").bail(),
 
 	body("password").notEmpty().withMessage("Password is required!").bail(),
 
