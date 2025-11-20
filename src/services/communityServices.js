@@ -81,6 +81,7 @@ export const deleteCommunityIfAdmin = async (userId, communityId) => {
 	return deletedCommunity;
 };
 
+//Transfer community admin
 export const transferCommunityAdmin = async (communityId, userId, newAdminId) => {
 	const community = await Community.findOne({ _id: communityId });
 	if (!community) throw new Error("Community not found");
@@ -89,6 +90,10 @@ export const transferCommunityAdmin = async (communityId, userId, newAdminId) =>
 	
 	const newAdmin = await User.findById(newAdminId);
 	if (!newAdmin) throw new error("Not a valid user id");
+
+	//checks if new admin is a member
+	if (!community.members.some(id => id.toString() === newAdminId.toString())) 
+		throw new Error("The user is not a member in the community")
 	
 	community.communityAdmin = newAdminId;
 	community.save();
