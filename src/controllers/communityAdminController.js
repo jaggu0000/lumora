@@ -1,4 +1,4 @@
-import { addNewModerator, changePrivacySettings, deleteCommunityIfAdmin, revokeCommunityModerator, transferCommunityAdmin } from "../services/communityAdminServices.js";
+import { addNewModerator, changePrivacySettings, deleteCommunityIfAdmin, revokeCommunityModerator, transferCommunityAdmin, updateCommunityRules } from "../services/communityAdminServices.js";
 
 // Delete a community
 export const deleteCommunity = async (req, res) => {
@@ -59,4 +59,18 @@ export const setPrivacy = async (req, res) => {
 	} catch (error) {
 		res.status(500).json({ success: false, error: error.message });
 	}
+};
+
+// Update the rules of a community
+export const updateRules = async (req, res) => {
+	try {
+		const { userId } = req.auth;
+		const { communityId } = req.params;
+		const { communityRules } = req.body;
+		await updateCommunityRules(userId, communityId, communityRules);
+		res.status(200).json({ message: "Successfully updated the rules" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+	
 };

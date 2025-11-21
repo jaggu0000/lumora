@@ -89,3 +89,16 @@ export const changePrivacySettings = async (userId, communityId) => {
 
 	await community.save();
 };
+
+// update rules of a community
+export const updateCommunityRules = async (userId, communityId, communityRules) => {
+	const community = await findCommunity(communityId);
+
+	checkIfAdminOrModerator(community, userId);
+
+	const trimmed = communityRules.trim();
+	if(trimmed.length > 1000) throw new Error("The rules must contain less than 1000 characters");
+
+	community.communityRules = trimmed;
+	await community.save();
+};
