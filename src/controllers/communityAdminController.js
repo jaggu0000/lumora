@@ -1,4 +1,4 @@
-import { addNewModerator, changePrivacySettings, deleteCommunityIfAdmin, transferCommunityAdmin } from "../services/communityAdminServices.js";
+import { addNewModerator, changePrivacySettings, deleteCommunityIfAdmin, revokeCommunityModerator, transferCommunityAdmin } from "../services/communityAdminServices.js";
 
 // Delete a community
 export const deleteCommunity = async (req, res) => {
@@ -29,9 +29,22 @@ export const changeCommunityAdmin = async (req, res) => {
 export const addmoderator = async (req, res) => {
 	try {
 		const { userId } = req.auth;
-		const { communityId, moderatorId } = req.params;
-		await addNewModerator(communityId, userId, moderatorId);
+		const { communityId, newModeratorId } = req.params;
+		await addNewModerator(communityId, userId, newModeratorId);
 		res.status(200).json({ message: "Added moderator successfully" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Revoke moderator
+export const revokeModerator = async (req, res) => {
+	try {
+		const { userId } = req.auth;
+		const { communityId, moderatorId } = req.params;
+		console.log(moderatorId);
+		await revokeCommunityModerator(communityId, userId, moderatorId);
+		res.status(200).json({message: "Moderator revoked successfully"});
 	} catch (error) {
 		res.status(500).json({ success: false, error: error.message });
 	}

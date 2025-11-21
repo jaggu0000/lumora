@@ -1,4 +1,5 @@
 import Community from "../models/CommunityDB/Community.js";
+import User from "../models/UserDB/User.js";
 import UserMetadata from "../models/UserDB/UserMetadata.js";
 import { findCommunity } from "./communityServices.js";
 
@@ -38,7 +39,7 @@ export const transferCommunityAdmin = async (communityId, userId, newAdminId) =>
 	checkIfCommunityAdmin(community, userId);
 
 	const newAdmin = await User.findById(newAdminId);
-	if (!newAdmin) throw new error("Not a valid user id");
+	if (!newAdmin) throw new Error("Not a valid user id");
 
 	//checks if new admin is a member
 	if (!community.members.some((id) => id.toString() === newAdminId.toString())) throw new Error("The user is not a member in the community");
@@ -48,21 +49,33 @@ export const transferCommunityAdmin = async (communityId, userId, newAdminId) =>
 };
 
 // add new moderator
-export const addNewModerator = async (communityId, userId, moderatorId) => {
+export const addNewModerator = async (communityId, userId, newModeratorId) => {
 	const community = await findCommunity(communityId);
 
 	checkIfCommunityAdmin(community, userId);
 
-	const newModerator = await User.findById(moderatorId);
+	const newModerator = await User.findById(newModeratorId);
 	if (!newModerator) throw new Error("moderatorId is not a valid userId");
 
 	//checks if moderator is a member
-	if (!community.members.some((id) => id.toString() === moderatorId.toString())) throw new Error("The user is not a member in the community");
+	if (!community.members.some((id) => id.toString() === newModeratorId.toString())) throw new Error("The user is not a member in the community");
 
 	//adds to moderator array (if not included)
-	if (!community.moderators.some((id) => id.toString() === moderatorId.toString())) community.moderators.push(moderatorId);
+	if (!community.moderators.some((id) => id.toString() === newModeratorId.toString())) community.moderators.push(newModeratorId);
 	else throw new Error("User is already a moderator");
 
+	await community.save();
+};
+
+// revoke a moderator
+export const revokeCommunityModerator = async (communityId, userId, moderatorId) => {
+	const community = await findCommunity(communityId);
+
+	checkIfCommunityAdmin(community, userId);
+
+	if(!community.moderators.some((id) => id.toString() === moderatorId.toString())) throw new Error("The user is not a moderator");
+
+	community.moderators = community.moderators.filter((id) => id.toString() !== moderatorId.toString());
 	await community.save();
 };
 
