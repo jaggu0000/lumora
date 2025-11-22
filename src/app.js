@@ -22,9 +22,9 @@ app.use(express.json());
 app.use(cookieParser());
 
 // User Routes
-app.use("/api/auth", authRouter);
-app.use("/api/user/community/admin", authenticate, isUser, communityAdminRouter);
-app.use("/api/user/community", authenticate, isUser, communityRouter);
-app.use("/api/user", authenticate, isUser, userRouter);
+app.use("/auth", authRouter);
+app.use("/user/community/admin", authenticate, isUser, communityAdminRouter);
+app.use("/user/community", authenticate, isUser, communityRouter);
+app.use("/user", authenticate, isUser, userRouter);
 
 export default app;
