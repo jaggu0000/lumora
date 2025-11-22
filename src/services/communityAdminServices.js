@@ -73,7 +73,7 @@ export const revokeCommunityModerator = async (communityId, userId, moderatorId)
 
 	checkIfCommunityAdmin(community, userId);
 
-	if(!community.moderators.some((id) => id.toString() === moderatorId.toString())) throw new Error("The user is not a moderator");
+	if (!community.moderators.some((id) => id.toString() === moderatorId.toString())) throw new Error("The user is not a moderator");
 
 	community.moderators = community.moderators.filter((id) => id.toString() !== moderatorId.toString());
 	await community.save();
@@ -90,6 +90,20 @@ export const changePrivacySettings = async (userId, communityId) => {
 	await community.save();
 };
 
+// change membership modes
+export const changeMembershipMode = async (userId, communityId, membershipMode) => {
+	const community = await findCommunity(communityId);
+
+	checkIfCommunityAdmin(community, userId);
+	
+	const membershipModes = ["open", "invite-only", "request-to-join"];
+	if (!membershipModes.includes(membershipMode)) throw new Error("Provided option is not a valid membership mode");
+	
+	community.membershipMode = membershipMode;
+
+	await community.save();
+};
+
 // update rules of a community
 export const updateCommunityRules = async (userId, communityId, communityRules) => {
 	const community = await findCommunity(communityId);
@@ -97,7 +111,7 @@ export const updateCommunityRules = async (userId, communityId, communityRules) 
 	checkIfAdminOrModerator(community, userId);
 
 	const trimmed = communityRules.trim();
-	if(trimmed.length > 1000) throw new Error("The rules must contain less than 1000 characters");
+	if (trimmed.length > 1000) throw new Error("The rules must contain less than 1000 characters");
 
 	community.communityRules = trimmed;
 	await community.save();
