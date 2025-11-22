@@ -1,12 +1,16 @@
+import express from "express";
 import { connectDatabases } from "./src/config/db.js";
 import env from "./src/config/env.js";
 import app from "./src/app.js";
+
+const server = express();
+server.use("/api", app); // Assigning prefix
 
 // Start server after database connections
 const startServer = async () => {
 	try {
 		await connectDatabases();
-		app.listen(env.SERVER_PORT, () => {
+		server.listen(env.SERVER_PORT, () => {
 			console.log(`Server is running on http://localhost:${env.SERVER_PORT}`);
 		});
 	} catch (error) {
@@ -16,7 +20,3 @@ const startServer = async () => {
 };
 
 startServer();
-
-app.get("/api", (req, res) => {
-	res.send("Hello, Lumora!");
-});
