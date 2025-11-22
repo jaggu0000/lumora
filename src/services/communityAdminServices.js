@@ -102,3 +102,17 @@ export const updateCommunityRules = async (userId, communityId, communityRules) 
 	community.communityRules = trimmed;
 	await community.save();
 };
+
+// block members of a community
+export const blockCommunityUsers = async (userId, communityId, blockUserId) => {
+	const community = await findCommunity(communityId);
+	checkIfAdminOrModerator(community, userId);
+
+	//check if the user is a member of the community
+	if (!community.members.some((id) => id.toString() === blockUserId.toString())) throw new Error("The user is not a member in the community");
+
+	if (!community.blockedUsers.some((id) => id.toString() === blockUserId.toString())) community.blockedUsers.push(blockUserId);
+	else throw new Error("User is already blocked");
+
+	await community.save();
+};

@@ -1,7 +1,7 @@
 import express from "express";
 import { communityCreationValidation } from "../validators/communityValidator.js";
 import { createCommunity, joinCommunity, leaveCommunity } from "../controllers/communityController.js";
-import { addmoderator, changeCommunityAdmin, deleteCommunity, revokeModerator, setPrivacy, updateRules } from "../controllers/communityAdminController.js";
+import { addmoderator, blockUsers, changeCommunityAdmin, deleteCommunity, revokeModerator, setPrivacy, updateRules } from "../controllers/communityAdminController.js";
 
 const communityRouter = express.Router(); // community user routes
 const communityAdminRouter = express.Router(); //community admin routes
@@ -17,5 +17,6 @@ communityAdminRouter.post("/add-moderator/:communityId/:newModeratorId", addmode
 communityAdminRouter.put("/revoke-moderator/:communityId/:moderatorId", revokeModerator);
 communityAdminRouter.put("/set-privacy/:communityId", setPrivacy);
 communityAdminRouter.put("/update-community-rules/:communityId", updateRules);
+communityAdminRouter.put("/block-users/:communityId/:blockUserId", blockUsers);
 
 export { communityAdminRouter, communityRouter };
