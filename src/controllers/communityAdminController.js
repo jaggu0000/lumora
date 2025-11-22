@@ -1,5 +1,13 @@
-import { addNewModerator, changePrivacySettings, deleteCommunityIfAdmin, revokeCommunityModerator, transferCommunityAdmin, updateCommunityRules, blockCommunityUsers } from "../services/communityAdminServices.js";
-
+import {
+	addNewModerator,
+	changeMembershipMode,
+	changePrivacySettings,
+	deleteCommunityIfAdmin,
+	revokeCommunityModerator,
+	transferCommunityAdmin,
+	updateCommunityRules,
+	blockCommunityUsers,
+} from "../services/communityAdminServices.js";
 // Delete a community
 export const deleteCommunity = async (req, res) => {
 	try {
@@ -43,7 +51,7 @@ export const revokeModerator = async (req, res) => {
 		const { userId } = req.auth;
 		const { communityId, moderatorId } = req.params;
 		await revokeCommunityModerator(communityId, userId, moderatorId);
-		res.status(200).json({message: "Moderator revoked successfully"});
+		res.status(200).json({ message: "Moderator revoked successfully" });
 	} catch (error) {
 		res.status(500).json({ success: false, error: error.message });
 	}
@@ -56,6 +64,19 @@ export const setPrivacy = async (req, res) => {
 		const { communityId } = req.params;
 		await changePrivacySettings(userId, communityId);
 		res.status(200).json({ message: "Successfully changed the privacy settings" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Change membership mode
+export const updateMembershipMode = async (req, res) => {
+	try {
+		const { userId } = req.auth;
+		const { communityId } = req.params;
+		const { membershipMode } = req.body;
+		await changeMembershipMode(userId, communityId, membershipMode);
+		res.status(200).json({ message: "Successfully changed the membership mode" });
 	} catch (error) {
 		res.status(500).json({ success: false, error: error.message });
 	}
