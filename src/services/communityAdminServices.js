@@ -1,7 +1,7 @@
 import Community from "../models/CommunityDB/Community.js";
 import User from "../models/UserDB/User.js";
 import UserMetadata from "../models/UserDB/UserMetadata.js";
-import { findCommunity } from "./communityServices.js";
+import { addUserToCommunity, findCommunity } from "./communityServices.js";
 
 // Check if the requesting user is the community admin
 export const checkIfCommunityAdmin = (community, userId) => {
@@ -42,7 +42,8 @@ export const transferCommunityAdmin = async (communityId, userId, newAdminId) =>
 	if (!newAdmin) throw new Error("Not a valid user id");
 
 	//checks if new admin is a member
-	if (!community.members.some((id) => id.toString() === newAdminId.toString())) throw new Error("The user is not a member in the community");
+	if (!community.members.some((id) => id.toString() === newAdminId.toString()))
+		throw new Error("The user is not a member in the community");
 
 	community.communityAdmin = newAdminId;
 	await community.save();
@@ -58,10 +59,12 @@ export const addNewModerator = async (communityId, userId, newModeratorId) => {
 	if (!newModerator) throw new Error("moderatorId is not a valid userId");
 
 	//checks if moderator is a member
-	if (!community.members.some((id) => id.toString() === newModeratorId.toString())) throw new Error("The user is not a member in the community");
+	if (!community.members.some((id) => id.toString() === newModeratorId.toString()))
+		throw new Error("The user is not a member in the community");
 
 	//adds to moderator array (if not included)
-	if (!community.moderators.some((id) => id.toString() === newModeratorId.toString())) community.moderators.push(newModeratorId);
+	if (!community.moderators.some((id) => id.toString() === newModeratorId.toString()))
+		community.moderators.push(newModeratorId);
 	else throw new Error("User is already a moderator");
 
 	await community.save();
@@ -73,7 +76,8 @@ export const revokeCommunityModerator = async (communityId, userId, moderatorId)
 
 	checkIfCommunityAdmin(community, userId);
 
-	if (!community.moderators.some((id) => id.toString() === moderatorId.toString())) throw new Error("The user is not a moderator");
+	if (!community.moderators.some((id) => id.toString() === moderatorId.toString()))
+		throw new Error("The user is not a moderator");
 
 	community.moderators = community.moderators.filter((id) => id.toString() !== moderatorId.toString());
 	await community.save();
@@ -95,13 +99,16 @@ export const changePrivacySettings = async (userId, communityId) => {
 };
 
 // change membership modes
-export const changeMembershipMode = async (userId, communityId, membershipMode) => {
+export const changeMembershipMode = async (userId, communityId, membershipMode, approveAllRequest) => {
 	const community = await findCommunity(communityId);
 
 	checkIfCommunityAdmin(community, userId);
 
 	const membershipModes = ["open", "invite-only", "request-to-join"];
 	if (!membershipModes.includes(membershipMode)) throw new Error("Provided option is not a valid membership mode");
+
+	// checks if the existing membership mode is same as the request
+	if (community.membershipMode === membershipMode) throw new Error("Membership mode has no change");
 
 	community.membershipMode = membershipMode;
 
@@ -111,6 +118,24 @@ export const changeMembershipMode = async (userId, communityId, membershipMode) 
 	//set community to public if membership mode is not invite-only
 	if (membershipMode !== "invite-only") community.isPrivate = false;
 
+	// handle existing join requests when membership mode is open
+	if (membershipMode === "open") {
+		if (!approveAllRequest) {
+			community.joinRequests = [];
+		} else {
+			for (const requestedUserId of community.joinRequests) {
+				const userId = requestedUserId.toString();
+				const userMetadata = await UserMetadata.findOne({ userId });
+				if (!userMetadata) throw new Error("User metadata not found");
+
+				userMetadata.joinedCommunities.push(community._id);
+				const savedMetadata = await userMetadata.save();
+				if (!savedMetadata) throw new Error("Failed to update user metadata");
+				community.members.push(userId);
+			}
+			community.joinRequests = [];
+		}
+	}
 	await community.save();
 };
 
@@ -133,9 +158,11 @@ export const blockCommunityUsers = async (userId, communityId, blockUserId) => {
 	checkIfAdminOrModerator(community, userId);
 
 	//check if the user is a member of the community
-	if (!community.members.some((id) => id.toString() === blockUserId.toString())) throw new Error("The user is not a member in the community");
+	if (!community.members.some((id) => id.toString() === blockUserId.toString()))
+		throw new Error("The user is not a member in the community");
 
-	if (!community.blockedUsers.some((id) => id.toString() === blockUserId.toString())) community.blockedUsers.push(blockUserId);
+	if (!community.blockedUsers.some((id) => id.toString() === blockUserId.toString()))
+		community.blockedUsers.push(blockUserId);
 	else throw new Error("User is already blocked");
 
 	await community.save();
