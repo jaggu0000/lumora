@@ -7,7 +7,7 @@ export const userReportValidation = [
 		.withMessage("Reason type is required")
 		.bail()
 		.isIn(["Spam", "Harassment", "Inappropriate Content", "Impersonation", "Hate speech or Discrimination", "Other"])
-        .withMessage("Invalid membership mode"),
+        .withMessage("Invalid reason type"),
 
     body("reason")
         .trim()
