@@ -74,8 +74,8 @@ export const updateMembershipMode = async (req, res) => {
 	try {
 		const { userId } = req.auth;
 		const { communityId } = req.params;
-		const { membershipMode } = req.body;
-		await changeMembershipMode(userId, communityId, membershipMode);
+		const { membershipMode, approveAllRequest } = req.body;
+		await changeMembershipMode(userId, communityId, membershipMode, approveAllRequest);
 		res.status(200).json({ message: "Successfully changed the membership mode" });
 	} catch (error) {
 		res.status(500).json({ success: false, error: error.message });
