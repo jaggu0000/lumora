@@ -5,6 +5,7 @@ import {
 	addmoderator,
 	blockUsers,
 	changeCommunityAdmin,
+	changeInviteCode,
 	deleteCommunity,
 	revokeModerator,
 	setPrivacy,
@@ -27,6 +28,7 @@ communityAdminRouter.post("/add-moderator/:communityId/:newModeratorId", addmode
 communityAdminRouter.put("/revoke-moderator/:communityId/:moderatorId", revokeModerator);
 communityAdminRouter.put("/set-privacy/:communityId", setPrivacy);
 communityAdminRouter.put("/change-membership-mode/:communityId", updateMembershipMode); //changes membership mode
+communityAdminRouter.patch("/change-invite-code/:communityId", changeInviteCode); //changes invite code
 communityAdminRouter.put("/update-community-rules/:communityId", updateRules);
 communityAdminRouter.put("/block-users/:communityId/:blockUserId", blockUsers);
 

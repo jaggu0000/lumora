@@ -1,6 +1,7 @@
 import Community from "../models/CommunityDB/Community.js";
 import User from "../models/UserDB/User.js";
 import UserMetadata from "../models/UserDB/UserMetadata.js";
+import { generateInviteCode } from "../utils/inviteCode.js";
 import { addUserToCommunity, findCommunity } from "./communityServices.js";
 
 // Check if the requesting user is the community admin
@@ -136,6 +137,18 @@ export const changeMembershipMode = async (userId, communityId, membershipMode, 
 			community.joinRequests = [];
 		}
 	}
+	await community.save();
+};
+
+// set new invite code
+export const setNewInviteCode = async (userId, communityId) => {
+	const community = await findCommunity(communityId);
+
+	checkIfCommunityAdmin(community, userId);
+
+	const newInviteCode = await generateInviteCode();
+
+	community.inviteCode = newInviteCode;
 	await community.save();
 };
 
