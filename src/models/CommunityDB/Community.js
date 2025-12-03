@@ -3,6 +3,7 @@ import { communityDB } from "../../config/db.js";
 import User from "../UserDB/User.js";
 import UserReport from "../AdminDB/UserReport.js";
 import VideoRoom from "./VideoRoom.js";
+import { generateInviteCode } from "../../utils/inviteCode.js";
 
 const communitySchema = new mongoose.Schema(
 	{
@@ -76,6 +77,7 @@ const communitySchema = new mongoose.Schema(
 		},
 		inviteCode: {
 			type: String,
+			unique: true,
 		},
 		joinRequests: {
 			type: [mongoose.Schema.Types.ObjectId],
@@ -104,6 +106,10 @@ const communitySchema = new mongoose.Schema(
 	},
 	{ timestamps: true }
 );
+
+communitySchema.pre("save", async function() {
+	if (!this.inviteCode) this.inviteCode = await generateInviteCode();
+});
 
 const Community = communityDB.model("Community", communitySchema);
 export default Community;
