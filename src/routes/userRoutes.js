@@ -15,7 +15,7 @@ userRouter
 	.route("/todo/:todoId")
 	.put(taskCreationValidation, editTodo) // Edit Todo
 	.delete(deleteTodo); // Delete Todo
-userRouter.put("/todo/completed/:todoId", completeTodo);
+userRouter.patch("/todo/completed/:todoId", completeTodo);
 userRouter.post("/report-user/:communityId/:reportedUserId", reportValidation, reportUser);
 userRouter.post("/report-community/:communityId", reportValidation, reportCommunity);
 

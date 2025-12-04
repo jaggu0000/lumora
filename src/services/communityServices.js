@@ -109,7 +109,7 @@ export const removeUserFromMembers = async (userId, communityId) => {
 
 	community.moderators = community.moderators.filter((id) => id.toString() !== userId.toString()); //filter out the user from moderators if they are
 
-	if (!community.previousMembers.some((id) => id.toString === userId.toString()))
+	if (!community.previousMembers.some((id) => id.toString() === userId.toString()))
 		//adds the userId to previous member list if doesn't exist
 		community.previousMembers.push(userId);
 
