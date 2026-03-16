@@ -1,0 +1,134 @@
+import {
+	addNewModerator,
+	changeMembershipMode,
+	changePrivacySettings,
+	deleteCommunityIfAdmin,
+	revokeCommunityModerator,
+	transferCommunityAdmin,
+	updateCommunityRules,
+	blockCommunityUsers,
+	fetchAllJoinRequests,
+	setNewInviteCode,
+} from "../services/communityAdminServices.js";
+// Delete a community
+export const deleteCommunity = async (req, res) => {
+	try {
+		const { communityId } = req.params;
+		const { userId } = req.auth;
+		await deleteCommunityIfAdmin(userId, communityId);
+		res.status(200).json({ message: "Community deleted successfully" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Transfer admin of a community
+export const changeCommunityAdmin = async (req, res) => {
+	try {
+		const { communityId } = req.params;
+		const { userId } = req.auth;
+		const { newAdminId } = req.params;
+		await transferCommunityAdmin(communityId, userId, newAdminId);
+		res.status(200).json({ message: "Admin transferred successfully" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Add moderator
+export const addmoderator = async (req, res) => {
+	try {
+		const { userId } = req.auth;
+		const { communityId, newModeratorId } = req.params;
+		await addNewModerator(communityId, userId, newModeratorId);
+		res.status(200).json({ message: "Added moderator successfully" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Revoke moderator
+export const revokeModerator = async (req, res) => {
+	try {
+		const { userId } = req.auth;
+		const { communityId, moderatorId } = req.params;
+		await revokeCommunityModerator(communityId, userId, moderatorId);
+		res.status(200).json({ message: "Moderator revoked successfully" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Change privacy settings of a community
+export const setPrivacy = async (req, res) => {
+	try {
+		const { userId } = req.auth;
+		const { communityId } = req.params;
+		await changePrivacySettings(userId, communityId);
+		res.status(200).json({ message: "Successfully changed the privacy settings" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Change membership mode
+export const updateMembershipMode = async (req, res) => {
+	try {
+		const { userId } = req.auth;
+		const { communityId } = req.params;
+		const { membershipMode, approveAllRequest } = req.body;
+		await changeMembershipMode(userId, communityId, membershipMode, approveAllRequest);
+		res.status(200).json({ message: "Successfully changed the membership mode" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// change invite code
+export const changeInviteCode = async (req, res) => {
+	try {
+		const { userId } = req.auth;
+		const { communityId } = req.params;
+		await setNewInviteCode(userId, communityId);
+		res.status(200).json({ message: "Changed the invite code successfully"});
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Update the rules of a community
+export const updateRules = async (req, res) => {
+	try {
+		const { userId } = req.auth;
+		const { communityId } = req.params;
+		const { communityRules } = req.body;
+		await updateCommunityRules(userId, communityId, communityRules);
+		res.status(200).json({ message: "Successfully updated the rules" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Block users in a community
+export const blockUsers = async (req, res) => {
+	try {
+		const { userId } = req.auth;
+		const { communityId, blockUserId } = req.params;
+		await blockCommunityUsers(userId, communityId, blockUserId);
+		res.status(200).json({ message: "Successfully blocked the user" });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Fetch all join requests
+export const fetchJoinRequests = async (req, res) => {
+	try {
+		const { userId } = req.auth;
+		const { communityId } = req.params;
+		const joinRequests = await fetchAllJoinRequests(communityId, userId);
+		res.status(200).json({ success: true, joinRequests });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
