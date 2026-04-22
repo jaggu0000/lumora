@@ -4,9 +4,10 @@ import cookieParser from "cookie-parser";
 
 import authRouter from "./routes/authRoutes.js";
 import userRouter from "./routes/userRoutes.js";
-import { authenticate, isUser } from "./middlewares/authMiddleware.js";
+import { authenticate, isAdmin, isUser } from "./middlewares/authMiddleware.js";
 import env from "./config/env.js";
 import { communityAdminRouter, communityRouter } from "./routes/communityRoutes.js";
+import adminRouter from "./routes/adminRoutes.js";
 
 const app = express();
 
@@ -26,5 +27,8 @@ app.use("/auth", authRouter);
 app.use("/user/community/admin", authenticate, isUser, communityAdminRouter);
 app.use("/user/community", authenticate, isUser, communityRouter);
 app.use("/user", authenticate, isUser, userRouter);
+
+// Admin Routes
+app.use("/admin", authenticate, isAdmin, adminRouter);
 
 export default app;

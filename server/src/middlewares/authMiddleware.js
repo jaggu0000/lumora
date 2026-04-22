@@ -53,3 +53,13 @@ export const isUser = (req, res, next) => {
 	}
 	next();
 };
+
+export const isAdmin = (req, res, next) => {
+	if (req.auth.role !== "admin") {
+		return res.status(403).json({
+			success: false,
+			message: "Forbidden: Admin access required",
+		});
+	}
+	next();
+};
