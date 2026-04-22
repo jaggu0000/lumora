@@ -2,6 +2,8 @@ import Achievement from "../models/AdminDB/Achievement.js";
 import Rule from "../models/AdminDB/Rule.js";
 import UserReport from "../models/AdminDB/UserReport.js";
 import CommunityReport from "../models/AdminDB/CommunityReport.js";
+import User from "../models/UserDB/User.js";
+import Community from "../models/CommunityDB/Community.js";
 
 // ── Achievements ──────────────────────────────────────────────────────────────
 
@@ -50,9 +52,9 @@ export const getUserReports = async ({ status, page = 1, limit = 20 }) => {
 	const skip = (page - 1) * limit;
 	const [reports, total] = await Promise.all([
 		UserReport.find(filter)
-			.populate("reportedBy", "username email")
-			.populate("reportedUser", "username email")
-			.populate("associatedCommunity", "name")
+			.populate({ path: "reportedBy", select: "username email", model: User })
+			.populate({ path: "reportedUser", select: "username email", model: User })
+			.populate({ path: "associatedCommunity", select: "name", model: Community })
 			.sort({ createdAt: -1 })
 			.skip(skip)
 			.limit(limit),
@@ -76,8 +78,8 @@ export const getCommunityReports = async ({ status, page = 1, limit = 20 }) => {
 	const skip = (page - 1) * limit;
 	const [reports, total] = await Promise.all([
 		CommunityReport.find(filter)
-			.populate("reportedBy", "username email")
-			.populate("reportedCommunity", "name")
+			.populate({ path: "reportedBy", select: "username email", model: User })
+			.populate({ path: "reportedCommunity", select: "name", model: Community })
 			.sort({ createdAt: -1 })
 			.skip(skip)
 			.limit(limit),

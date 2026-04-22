@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 import { adminDB } from "../../config/db.js";
-import User from "../UserDB/User.js";
-import Community from "../CommunityDB/Community.js";
 
 const communityReportSchema = new mongoose.Schema({
 	reportedBy: {
