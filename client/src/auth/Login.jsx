@@ -2,6 +2,8 @@ import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 
+const BASE = import.meta.env.VITE_BACKEND_URL;
+
 const floatAnim = {
   animate: {
     y: [0, -18, 0],
@@ -67,8 +69,9 @@ export default function Login() {
 
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3000/api/auth/login', {
+      const response = await fetch(`${BASE}/auth/login`, {
         method: 'POST',
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json',
         },
