@@ -2,6 +2,9 @@ import express from "express";
 import { connectDatabases } from "./src/config/db.js";
 import env from "./src/config/env.js";
 import app from "./src/app.js";
+import dns from 'dns'
+
+dns.setServers(['1.1.1.1', '8.8.8.8'])
 
 const server = express();
 server.use("/api", app); // Assigning prefix
