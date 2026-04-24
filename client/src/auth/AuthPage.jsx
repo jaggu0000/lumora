@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
+import { saveToken } from "../api/token";
 import './auth.css';
 
 const BASE = import.meta.env.VITE_BACKEND_URL;
@@ -149,6 +150,7 @@ function LoginForm({ switchMode }) {
       });
       const data = await res.json();
       if (res.ok) {
+        if (data.token) saveToken(data.token);
         navigate("/dashboard");
       } else if (data.errors) {
         const se = {};
@@ -287,6 +289,7 @@ function SignupForm({ switchMode }) {
       });
       const data = await res.json();
       if (res.ok) {
+        if (data.token) saveToken(data.token);
         switchMode("login");
       } else if (data.errors) {
         const se = {};
