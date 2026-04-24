@@ -2,9 +2,12 @@ import express from "express";
 import { taskCreationValidation } from "../validators/todoValidator.js";
 import { addTodo, completeTodo, deleteTodo, editTodo, getAllTodo } from "../controllers/todoController.js";
 import { reportValidation } from "../validators/userValidator.js";
-import { reportCommunity, reportUser } from "../controllers/userController.js";
+import { getUserProfile, reportCommunity, reportUser } from "../controllers/userController.js";
 
 const userRouter = express.Router();
+
+// Profile
+userRouter.get("/profile", getUserProfile);
 
 // Task routes
 userRouter

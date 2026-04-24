@@ -2,10 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import AICoach from '../components/AICoach/AICoach.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { getUserProfile } from '../api/userApi.js';
 import './Dashboard.css';
-
-/* ── Mock data ───────────────────────────────────────────────────── */
-const MOCK_USER = { username: 'Harsha', email: 'harsha@lumora.app', role: 'member' };
 
 const MOCK_COMMUNITIES = [
   { _id: '1', communityName: 'Lumora Design',    communityTag: 'design',   members: 142, online: 8,  lastMsg: '2m ago',  color: '#8b5cf6' },
@@ -155,9 +153,7 @@ function PomodoroTimer() {
 }
 
 /* ── Streak Card ─────────────────────────────────────────────────── */
-function StreakCard() {
-  const streak = 7;
-  const longest = 21;
+function StreakCard({ streak = 0, longest = 0 }) {
   const today = new Date().getDay();
 
   return (
@@ -325,6 +321,13 @@ function TodoWidget() {
 export default function Dashboard() {
   const navigate  = useNavigate();
   const [active, setActive] = useState('/dashboard');
+  const [user, setUser]     = useState(null);
+
+  useEffect(() => {
+    getUserProfile()
+      .then(({ userMetadata }) => setUser(userMetadata))
+      .catch(console.error);
+  }, []);
 
   return (
     <div className="dash-root">
@@ -357,11 +360,11 @@ export default function Dashboard() {
         <div className="dash-sidebar-bottom">
           <div className="dash-user-card">
             <div className="dash-user-avatar">
-              {getInitials(MOCK_USER.username)}
+              {user ? getInitials(user.profile?.fullName || user.userId?.username || '?') : '…'}
             </div>
             <div className="dash-user-info">
-              <span className="dash-user-name">{MOCK_USER.username}</span>
-              <span className="dash-user-role">{MOCK_USER.role}</span>
+              <span className="dash-user-name">{user?.userId?.username ?? '—'}</span>
+              <span className="dash-user-role">{user?.userId?.role ?? '—'}</span>
             </div>
             <button className="dash-user-menu">⋯</button>
           </div>
@@ -376,7 +379,7 @@ export default function Dashboard() {
           <div className="dash-topbar-left">
             <h1 className="dash-greeting">
               Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'},
-              <em> {MOCK_USER.username}</em> 👋
+              <em> {user?.profile?.fullName || user?.userId?.username || '…'}</em> 👋
             </h1>
             <p className="dash-date">
               {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
@@ -397,13 +400,13 @@ export default function Dashboard() {
           {/* Left column */}
           <div className="dash-col-left">
             <PomodoroTimer />
-            <StreakCard />
+            <StreakCard streak={user?.streakCount ?? 0} longest={user?.maxStreakCount ?? 0} />
           </div>
 
           {/* Right column */}
           <div className="dash-col-right">
-            <CommunitiesPanel navigate={navigate} />
             <TodoWidget />
+            <CommunitiesPanel navigate={navigate} />
           </div>
 
         </div>

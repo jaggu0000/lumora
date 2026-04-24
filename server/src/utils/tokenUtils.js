@@ -13,10 +13,6 @@ export const generateToken = (user) => {
 	);
 };
 
-export const verifyToken = (token) =>
-	jwt.verify(token, env.JWT_SECRET_KEY, (err, decoded) => {
-		if (err) throw new Error("Invalid token");
-		return decoded;
-	});
+export const verifyToken = (token) => jwt.verify(token, env.JWT_SECRET_KEY);
 
 export const decodeToken = (token) => jwt.decode(token);

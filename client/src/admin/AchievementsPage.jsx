@@ -55,7 +55,7 @@ function Modal({ onClose, onSave, loading }) {
 						<button
 							type="submit"
 							disabled={loading}
-							className="flex-1 py-2 rounded-xl bg-gradient-to-r from-[#C9184A] to-[#9D0035] text-white text-sm font-medium disabled:opacity-50"
+							className="flex-1 py-2 rounded-xl bg-linear-to-r from-[#C9184A] to-[#9D0035] text-white text-sm font-medium disabled:opacity-50"
 						>
 							{loading ? "Saving…" : "Create"}
 						</button>
@@ -121,7 +121,7 @@ export default function AchievementsPage() {
 					whileHover={{ scale: 1.02 }}
 					whileTap={{ scale: 0.97 }}
 					onClick={() => setShowModal(true)}
-					className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#C9184A] to-[#9D0035] text-white text-sm font-medium shadow-[0_4px_16px_rgba(201,24,74,0.3)] flex items-center gap-2"
+					className="px-4 py-2 rounded-xl bg-linear-to-r from-[#C9184A] to-[#9D0035] text-white text-sm font-medium shadow-[0_4px_16px_rgba(201,24,74,0.3)] flex items-center gap-2"
 				>
 					<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="white" strokeWidth="2" strokeLinecap="round"/></svg>
 					Add Achievement
@@ -153,7 +153,7 @@ export default function AchievementsPage() {
 								{a.iconUrl ? (
 									<img src={a.iconUrl} alt={a.name} className="w-12 h-12 rounded-xl object-cover border border-[#E3AFBC]/40" />
 								) : (
-									<div className="w-12 h-12 rounded-xl bg-gradient-to-br from-[#C9184A]/15 to-[#5D001E]/10 flex items-center justify-center shrink-0">
+									<div className="w-12 h-12 rounded-xl bg-linear-to-br from-[#C9184A]/15 to-[#5D001E]/10 flex items-center justify-center shrink-0">
 										<svg width="20" height="20" viewBox="0 0 16 16" fill="none">
 											<path d="M8 1l1.8 3.6L14 5.4l-3 2.9.7 4.1L8 10.4l-3.7 2 .7-4.1L2 5.4l4.2-.8L8 1z" stroke="#C9184A" strokeWidth="1.3" strokeLinejoin="round"/>
 										</svg>
