@@ -1,6 +1,7 @@
 import React, { useRef, useState } from "react";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { useNavigate } from "react-router-dom";
+import './LandingPage.css';
 
 const NAV_LINKS = ["Features", "Pricing", "Blog"];
 

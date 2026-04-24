@@ -8,6 +8,7 @@ import { authenticate, isAdmin, isUser } from "./middlewares/authMiddleware.js";
 import env from "./config/env.js";
 import { communityAdminRouter, communityRouter } from "./routes/communityRoutes.js";
 import adminRouter from "./routes/adminRoutes.js";
+import aiRouter from "./routes/aiRoutes.js";
 
 const app = express();
 
@@ -27,6 +28,9 @@ app.use("/auth", authRouter);
 app.use("/user/community/admin", authenticate, isUser, communityAdminRouter);
 app.use("/user/community", authenticate, isUser, communityRouter);
 app.use("/user", authenticate, isUser, userRouter);
+
+// AI Coach (no auth required for now — swap with authenticate later)
+app.use("/ai", aiRouter);
 
 // Admin Routes
 app.use("/admin", authenticate, isAdmin, adminRouter);

@@ -1,0 +1,312 @@
+/* ── Variables (matches CommunityChat theme) ─────────────────────── */
+:root {
+  --vs-bg:       #080812;
+  --vs-surface:  #0e0e1f;
+  --vs-card:     rgba(255,255,255,0.05);
+  --vs-border:   rgba(255,255,255,0.08);
+  --vs-accent-1: #8b5cf6;
+  --vs-accent-2: #6d28d9;
+  --vs-accent-3: #ec4899;
+  --vs-gradient: linear-gradient(135deg, #6d28d9, #8b5cf6, #ec4899);
+  --vs-text:     #f1f5f9;
+  --vs-muted:    #94a3b8;
+  --vs-online:   #22c55e;
+  --vs-radius:   16px;
+}
+
+/* ── Animations ──────────────────────────────────────────────────── */
+@keyframes vsFadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes vsSlideUp {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1);    }
+}
+@keyframes vsPulse {
+  0%,100% { opacity: 1; box-shadow: 0 0 0 0 rgba(34,197,94,0.6); }
+  50%      { opacity: 0.8; box-shadow: 0 0 0 6px rgba(34,197,94,0); }
+}
+@keyframes vsSpin {
+  to { transform: rotate(360deg); }
+}
+@keyframes vsGlow {
+  0%,100% { box-shadow: 0 0 12px rgba(139,92,246,0.3); }
+  50%      { box-shadow: 0 0 28px rgba(139,92,246,0.6), 0 0 50px rgba(236,72,153,0.2); }
+}
+
+/* ── Overlay ─────────────────────────────────────────────────────── */
+.vs-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(8, 8, 18, 0.92);
+  backdrop-filter: blur(12px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: vsFadeIn 0.25s ease;
+}
+
+/* ── Container ───────────────────────────────────────────────────── */
+.vs-container {
+  width: min(960px, 96vw);
+  max-height: 96vh;
+  background: var(--vs-surface);
+  border: 1px solid var(--vs-border);
+  border-radius: 24px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: vsSlideUp 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  box-shadow: 0 32px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.15);
+}
+
+/* ── Header ──────────────────────────────────────────────────────── */
+.vs-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--vs-border);
+  background: rgba(255,255,255,0.02);
+  flex-shrink: 0;
+}
+
+.vs-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.vs-live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--vs-online);
+  animation: vsPulse 2s infinite;
+}
+
+.vs-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--vs-text);
+  letter-spacing: 0.02em;
+}
+
+.vs-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+
+.vs-cam-btn {
+  background: rgba(255,255,255,0.06);
+  border: 1px solid var(--vs-border);
+  border-radius: 8px;
+  padding: 6px 10px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.2s;
+}
+.vs-cam-btn:hover { background: rgba(255,255,255,0.1); }
+.vs-cam-btn.off   { background: rgba(220,38,38,0.15); border-color: rgba(220,38,38,0.4); }
+
+.vs-leave-btn {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border: none;
+  border-radius: 8px;
+  padding: 7px 18px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.vs-leave-btn:hover  { opacity: 0.9; transform: scale(1.02); }
+.vs-leave-btn:active { transform: scale(0.98); }
+
+/* ── Video Grid ──────────────────────────────────────────────────── */
+.vs-grid {
+  flex: 1;
+  display: grid;
+  gap: 10px;
+  padding: 16px;
+  min-height: 0;
+}
+
+/* 1 person: single tile fills the whole space */
+.vs-grid.count-1 {
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+}
+
+/* 2 people: side by side, each half */
+.vs-grid.count-2 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr;
+}
+
+/* 3 people: top tile full-width, two below side by side */
+.vs-grid.count-3 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+.vs-grid.count-3 .vs-tile:first-child {
+  grid-column: 1 / -1;
+}
+
+/* 4 people: 2×2 equal grid */
+.vs-grid.count-4 {
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+}
+
+/* ── Video Tile ──────────────────────────────────────────────────── */
+.vs-tile {
+  position: relative;
+  background: rgba(255,255,255,0.03);
+  border: 1px solid var(--vs-border);
+  border-radius: var(--vs-radius);
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 160px;
+  animation: vsGlow 4s ease-in-out infinite;
+}
+
+.vs-tile.local {
+  border-color: rgba(139,92,246,0.4);
+}
+
+.vs-tile.empty {
+  background: rgba(255,255,255,0.015);
+  border-style: dashed;
+  border-color: rgba(255,255,255,0.06);
+  animation: none;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.vs-tile video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border-radius: var(--vs-radius);
+}
+
+/* Name label */
+.vs-label {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(8,8,18,0.75);
+  backdrop-filter: blur(8px);
+  color: var(--vs-text);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 12px;
+  border-radius: 20px;
+  border: 1px solid rgba(255,255,255,0.08);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.vs-tile.local .vs-label {
+  background: rgba(109,40,217,0.6);
+  border-color: rgba(139,92,246,0.4);
+}
+
+/* Connecting overlay */
+.vs-connecting {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--vs-muted);
+  font-size: 13px;
+  background: rgba(8,8,18,0.6);
+  backdrop-filter: blur(4px);
+}
+
+.vs-connecting-spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid rgba(139,92,246,0.25);
+  border-top-color: var(--vs-accent-1);
+  border-radius: 50%;
+  animation: vsSpin 0.8s linear infinite;
+}
+
+/* Camera off overlay */
+.vs-cam-off {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: rgba(8,8,18,0.85);
+  color: var(--vs-muted);
+  font-size: 13px;
+}
+.vs-cam-off span:first-child { font-size: 36px; }
+
+
+/* ── Footer ──────────────────────────────────────────────────────── */
+.vs-footer {
+  padding: 10px 20px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--vs-muted);
+  border-top: 1px solid var(--vs-border);
+  background: rgba(255,255,255,0.01);
+  flex-shrink: 0;
+  opacity: 0.6;
+}
+
+/* ── Error card ──────────────────────────────────────────────────── */
+.vs-error-card {
+  background: var(--vs-surface);
+  border: 1px solid rgba(220,38,38,0.35);
+  border-radius: 20px;
+  padding: 40px 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 360px;
+  animation: vsSlideUp 0.3s ease;
+}
+
+.vs-error-icon { font-size: 40px; }
+
+.vs-error-msg {
+  color: var(--vs-muted);
+  font-size: 14px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .vs-container { border-radius: 16px; }
+  .vs-grid { gap: 6px; padding: 10px; }
+  .vs-grid.count-2,
+  .vs-grid.count-3,
+  .vs-grid.count-4 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .vs-grid.count-3 .vs-tile:first-child {
+    grid-column: 1 / -1;
+  }
+}
