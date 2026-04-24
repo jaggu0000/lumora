@@ -1,7 +1,7 @@
 import React from 'react';
 import CommunityPage from './pages/CommunityPage.jsx';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import LandingPage from './Pages/LandingPage.jsx'
+import LandingPage from './pages/LandingPage.jsx'
 import AuthPage from './auth/AuthPage.jsx'
 import Dashboard from './pages/Dashboard.jsx'
 import AdminLayout from './admin/AdminLayout.jsx'
