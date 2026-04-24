@@ -1,7 +1,6 @@
 import React from 'react';
 import CommunityChat from './components/Chat/CommunityChat';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
-import AICoach from './components/AICoach/AICoach.jsx';
 import LandingPage from './Pages/LandingPage.jsx'
 import Login from './auth/Login.jsx'
 import SignUp from './auth/SignUp.jsx'
@@ -16,7 +15,6 @@ const App = () => {
   return (
     <Router>
       <div className="App">
-        <AICoach />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />

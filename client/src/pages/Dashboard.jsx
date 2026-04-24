@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import AICoach from '../components/AICoach/AICoach.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import './Dashboard.css';
@@ -327,6 +328,7 @@ export default function Dashboard() {
 
   return (
     <div className="dash-root">
+      <AICoach />
       {/* background orbs */}
       <div className="dash-orb dash-orb-1" />
       <div className="dash-orb dash-orb-2" />
