@@ -628,7 +628,7 @@ export default function CommunityChat({ community, currentUser, onLeave }) {
               <span className="online-dot-small" />
               {membersData.length} members
             </div>
-            <button className="header-btn" title="Search">🔍</button>
+            {/* <button className="header-btn" title="Search">🔍</button> */}
             <button
               className="header-btn"
               title="Start video session"
