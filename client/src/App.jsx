@@ -1,8 +1,11 @@
-import React from 'react'
+import React from 'react';
+import CommunityChat from './components/Chat/CommunityChat';
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import AICoach from './components/AICoach/AICoach.jsx';
 import LandingPage from './Pages/LandingPage.jsx'
 import Login from './auth/Login.jsx'
 import SignUp from './auth/SignUp.jsx'
+import Dashboard from './pages/Dashboard.jsx'
 import AdminLayout from './admin/AdminLayout.jsx'
 import AchievementsPage from './admin/AchievementsPage.jsx'
 import RulesPage from './admin/RulesPage.jsx'
@@ -13,10 +16,13 @@ const App = () => {
   return (
     <Router>
       <div className="App">
+        <AICoach />
         <Routes>
           <Route path="/" element={<LandingPage />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<SignUp />} />
+          <Route path="/community" element={<CommunityChat />} />
+          <Route path="/dashboard" element={<Dashboard />} />
 
           <Route path="/admin" element={<AdminLayout />}>
             <Route index element={<Navigate to="/admin/achievements" replace />} />

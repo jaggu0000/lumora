@@ -10,6 +10,7 @@ const env = {
 	CONNECTION_STRING_ADMIN: process.env.CONNECTION_STRING_ADMIN,
 	JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
 	JWT: process.env.JWT,
+	OPENROUTER_API_KEY: process.env.API_KEY,
 };
 
 export default env;
