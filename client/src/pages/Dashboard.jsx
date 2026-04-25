@@ -206,6 +206,7 @@ function ExploreModal({ onClose, joinedIds, onJoined }) {
   const [communities, setCommunities] = useState([]);
   const [joining,     setJoining]     = useState(null);
   const [joined,      setJoined]      = useState(new Set(joinedIds));
+  const [requested,   setRequested]   = useState(new Set());
 
   useEffect(() => {
     getPublicCommunities()
@@ -216,9 +217,14 @@ function ExploreModal({ onClose, joinedIds, onJoined }) {
   const handleJoin = async (c) => {
     setJoining(c._id);
     try {
-      await joinCommunity(c._id);
-      setJoined(prev => new Set([...prev, c._id]));
-      onJoined();
+      const response = await joinCommunity(c._id);
+      const didRequest = response?.message?.toLowerCase().includes('request');
+      if (didRequest) {
+        setRequested(prev => new Set([...prev, c._id]));
+      } else {
+        setJoined(prev => new Set([...prev, c._id]));
+        onJoined();
+      }
     } catch (e) { console.error(e); }
     setJoining(null);
   };
@@ -253,6 +259,8 @@ function ExploreModal({ onClose, joinedIds, onJoined }) {
           {communities.map((c, i) => {
             const color    = communityColor(c._id);
             const isMember = joined.has(c._id);
+            const isRequested = requested.has(c._id);
+            const joinLabel = joining === c._id ? 'Requesting...' : isMember ? 'Joined' : isRequested ? 'Request Sent' : 'Join';
             return (
               <motion.div
                 key={c._id}
@@ -273,13 +281,13 @@ function ExploreModal({ onClose, joinedIds, onJoined }) {
                   <span className="explore-member-count">{c.members?.length ?? 0} members</span>
                   <span className="explore-mode-badge">{c.membershipMode === 'open' ? 'Open' : 'Request'}</span>
                   <motion.button
-                    className={`explore-join-btn ${isMember ? 'joined' : ''}`}
-                    disabled={isMember || joining === c._id}
+                    className={`explore-join-btn ${isMember || isRequested ? 'joined' : ''}`}
+                    disabled={isMember || isRequested || joining === c._id}
                     onClick={() => handleJoin(c)}
-                    whileHover={!isMember ? { scale: 1.04 } : {}}
-                    whileTap={!isMember ? { scale: 0.96 } : {}}
+                    whileHover={!isMember && !isRequested ? { scale: 1.04 } : {}}
+                    whileTap={!isMember && !isRequested ? { scale: 0.96 } : {}}
                   >
-                    {joining === c._id ? '…' : isMember ? 'Joined' : 'Join'}
+                    {joinLabel}
                   </motion.button>
                 </div>
               </motion.div>
@@ -733,4 +741,5 @@ export default function Dashboard() {
     </div>
   );
 }
+
 

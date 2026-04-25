@@ -2,6 +2,7 @@ import axios from "axios";
 import { getToken } from "./token";
 
 const BASE = `${import.meta.env.VITE_BACKEND_URL}/user/community`;
+const ADMIN_BASE = `${BASE}/admin`;
 
 const headers = () => {
 	const token = getToken();
@@ -34,3 +35,9 @@ export const reportCommunity = (communityId, reasonType, reason) =>
 
 export const createCommunity = (data) =>
 	handle(axios.post(`${BASE}/create`, data, { withCredentials: true, headers: headers() }));
+
+export const fetchCommunityJoinRequests = (communityId) =>
+	handle(axios.get(`${ADMIN_BASE}/fetch-all-joinrequests/${communityId}`, { withCredentials: true, headers: headers() }));
+
+export const approveCommunityJoinRequest = (communityId, requestUserId) =>
+	handle(axios.patch(`${ADMIN_BASE}/approve-joinrequest/${communityId}/${requestUserId}`, {}, { withCredentials: true, headers: headers() }));

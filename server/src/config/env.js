@@ -11,6 +11,7 @@ const env = {
 	JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
 	JWT: process.env.JWT,
 	OPENROUTER_API_KEY: process.env.API_KEY,
+	RESEND_API_KEY: process.env.RESEND_API_KEY,
 };
 
 export default env;

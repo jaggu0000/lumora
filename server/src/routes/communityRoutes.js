@@ -3,6 +3,7 @@ import { communityCreationValidation } from "../validators/communityValidator.js
 import { createCommunity, getCommunityDetails, joinCommunity, joinUsingInviteCode, leaveCommunity, reportCommunity } from "../controllers/communityController.js";
 import {
 	addmoderator,
+	approveJoinRequest,
 	blockUsers,
 	changeCommunityAdmin,
 	changeInviteCode,
@@ -34,6 +35,7 @@ communityAdminRouter.patch("/change-membership-mode/:communityId", updateMembers
 communityAdminRouter.patch("/change-invite-code/:communityId", changeInviteCode); //changes invite code
 communityAdminRouter.patch("/update-community-rules/:communityId", updateRules);
 communityAdminRouter.patch("/block-users/:communityId/:blockUserId", blockUsers);
-communityAdminRouter.get("/fetch-all-joinrequests/:communityId", fetchJoinRequests)
+communityAdminRouter.get("/fetch-all-joinrequests/:communityId", fetchJoinRequests);
+communityAdminRouter.patch("/approve-joinrequest/:communityId/:requestUserId", approveJoinRequest);
 
 export { communityAdminRouter, communityRouter };
