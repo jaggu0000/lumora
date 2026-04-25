@@ -6,7 +6,7 @@
   background: #080812;
   color: #f1f5f9;
   font-family: 'DM Sans', 'Inter', sans-serif;
-  overflow: hidden;
+  overflow: clip;
   position: relative;
 }
 
@@ -293,6 +293,12 @@
   align-items: flex-start;
   justify-content: space-between;
   flex-shrink: 0;
+  gap: 12px;
+}
+
+.dash-topbar-left {
+  flex: 1;
+  min-width: 0;
 }
 
 .dash-greeting {
@@ -301,6 +307,9 @@
   font-weight: 700;
   color: #f1f5f9;
   letter-spacing: -0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .dash-greeting em {
   font-style: normal;
@@ -318,17 +327,20 @@
 
 .dash-topbar-right { display: flex; gap: 8px; }
 
-.dash-icon-btn {
-  width: 38px; height: 38px;
+.dash-logout-btn {
+  height: 38px;
+  padding: 0 16px;
   border-radius: 10px;
   background: rgba(255,255,255,0.04);
   border: 1px solid rgba(255,255,255,0.07);
-  font-size: 16px;
+  color: rgba(255,255,255,0.7);
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
-  transition: background 0.2s;
+  display: flex; align-items: center; gap: 6px;
+  transition: background 0.2s, color 0.2s;
 }
-.dash-icon-btn:hover { background: rgba(255,255,255,0.08); }
+.dash-logout-btn:hover { background: rgba(239,68,68,0.15); border-color: rgba(239,68,68,0.3); color: #f87171; }
 
 /* ── Stats mini row ──────────────────────────────────────────────── */
 .stats-row-grid {
@@ -415,6 +427,9 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  overflow: hidden;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .pomo-header {
@@ -562,6 +577,7 @@
   position: relative;
   width: 200px;
   height: 200px;
+  max-width: 100%;
   margin-bottom: 20px;
 }
 
@@ -853,6 +869,22 @@
   flex-shrink: 0;
 }
 .todo-add-icon-btn:hover { opacity: 0.85; }
+
+.todo-collapse-btn {
+  display: none;
+  width: 26px; height: 26px;
+  border-radius: 7px;
+  background: rgba(255,255,255,0.05);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #64748b;
+  font-size: 12px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s, color 0.2s;
+  flex-shrink: 0;
+}
+.todo-collapse-btn:hover { background: rgba(255,255,255,0.1); color: #94a3b8; }
 
 /* Form */
 .todo-form {
@@ -1233,15 +1265,132 @@
 }
 .dash-sb-explore-icon { font-size: 14px; }
 
-/* ── Responsive ──────────────────────────────────────────────────── */
-@media (max-width: 1100px) {
-  .dash-grid { grid-template-columns: 1fr; }
-  .dash-col-left { flex-direction: row; flex-wrap: wrap; }
-  .pomo-card, .streak-card { flex: 1; min-width: 280px; }
+/* ── Hamburger ───────────────────────────────────────────────────── */
+.dash-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  transition: background 0.2s;
+}
+.dash-hamburger:hover { background: rgba(255,255,255,0.06); }
+.dash-hamburger span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  border-radius: 2px;
+  background: #94a3b8;
 }
 
-@media (max-width: 768px) {
-  .dash-sidebar { display: none; }
-  .dash-main { padding: 20px 16px; }
-  .stats-row-grid { grid-template-columns: repeat(2, 1fr); }
+/* ── Sidebar close button (mobile) ───────────────────────────────── */
+.sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: #64748b;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  margin-left: auto;
+  transition: background 0.15s, color 0.15s;
+}
+.sidebar-close-btn:hover { background: rgba(255,255,255,0.07); color: #94a3b8; }
+
+/* ── Sidebar backdrop ────────────────────────────────────────────── */
+.sidebar-backdrop {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(2px);
+  z-index: 99;
+}
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+
+/* ── ≤900px: sidebar becomes drawer, grid goes single-column ─────── */
+@media (max-width: 900px) {
+  /* Sidebar → fixed drawer */
+  .dash-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    z-index: 100;
+    transform: translateX(-100%);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+    box-shadow: 4px 0 32px rgba(0,0,0,0.5);
+  }
+  .dash-sidebar.sidebar-open { transform: translateX(0); }
+
+  .sidebar-backdrop { display: block; }
+  .sidebar-close-btn { display: block; }
+  .dash-hamburger { display: flex; }
+
+  .dash-logo { display: flex; align-items: center; width: 100%; padding-right: 12px; }
+
+  /* Single-column grid */
+  .dash-grid { grid-template-columns: 1fr; gap: 16px; }
+
+  /* Communities card hidden on mobile — accessible via sidebar */
+  .communities-card { display: none; }
+
+  /* Pomo card must not overflow */
+  .pomo-card { overflow: hidden; }
+  .pomo-ring-wrap { width: 160px; height: 160px; }
+  .pomo-time { font-size: 28px; }
+
+  /* Topbar */
+  .dash-main { padding: 16px 16px; gap: 16px; }
+  .dash-topbar { gap: 10px; align-items: center; }
+  .dash-greeting { font-size: 19px; }
+  .dash-date { font-size: 12px; }
+
+  /* Stats 2-column */
+  .stats-row-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .stat-mini-card { padding: 14px; }
+  .stat-mini-val { font-size: 18px; }
+
+  /* Todo list height */
+  .todo-list { max-height: 280px; }
+
+  /* Show collapse button on mobile */
+  .todo-collapse-btn { display: flex; }
+
+  /* Explore modal — bottom sheet */
+  .explore-overlay { padding: 0; align-items: flex-end; }
+  .explore-modal { max-width: 100%; max-height: 90vh; border-radius: 20px 20px 0 0; }
+}
+
+/* ── ≤480px: very small phones ───────────────────────────────────── */
+@media (max-width: 480px) {
+  .dash-main { padding: 12px 12px; gap: 12px; }
+
+  .dash-greeting { font-size: 16px; }
+  .dash-date { display: none; }
+  .dash-logout-btn { font-size: 12px; padding: 0 10px; height: 34px; }
+
+  .stats-row-grid { gap: 8px; }
+  .stat-mini-card { padding: 12px 10px; }
+  .stat-mini-icon { font-size: 16px; }
+  .stat-mini-val { font-size: 16px; }
+  .stat-mini-label { font-size: 11px; }
+
+  .dash-card { padding: 16px 12px; border-radius: 16px; }
+  .pomo-card { padding: 16px 12px; border-radius: 16px; }
+
+  .todo-tab { padding: 5px 8px; font-size: 11px; }
+  .todo-progress { font-size: 11px; padding: 2px 7px; }
+
+  .pomo-ring-wrap { width: 140px; height: 140px; }
+  .pomo-time { font-size: 24px; }
+  .pomo-mode-btn { font-size: 10px; padding: 6px 2px; }
+  .pomo-sessions { font-size: 11px; padding: 2px 7px; }
 }

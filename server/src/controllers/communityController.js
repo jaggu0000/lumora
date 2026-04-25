@@ -1,4 +1,5 @@
 import { addUserToCommunity, addUserWithInviteCode, createNewCommunity, fetchCommunityDetails, removeUserFromMembers } from "../services/communityServices.js";
+import CommunityReport from "../models/AdminDB/CommunityReport.js";
 
 export const getCommunityDetails = async (req, res) => {
 	try {
@@ -51,6 +52,23 @@ export const joinUsingInviteCode = async (req, res) => {
 			res.status(200).json({ message: "Joined the community successfully" });
 		res.status(200).json({ message: "Sent join request" });
 	}catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Report a community
+export const reportCommunity = async (req, res) => {
+	try {
+		const { communityId } = req.params;
+		const { userId } = req.auth;
+		const { reasonType, reason } = req.body;
+
+		const existing = await CommunityReport.findOne({ reportedBy: userId, reportedCommunity: communityId, status: "Pending" });
+		if (existing) return res.status(409).json({ success: false, error: "You already have a pending report for this community." });
+
+		await CommunityReport.create({ reportedBy: userId, reportedCommunity: communityId, reasonType, reason });
+		res.status(201).json({ success: true, message: "Report submitted successfully." });
+	} catch (error) {
 		res.status(500).json({ success: false, error: error.message });
 	}
 };

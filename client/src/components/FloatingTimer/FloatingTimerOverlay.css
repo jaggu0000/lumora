@@ -1,8 +1,9 @@
 .ft-overlay {
   position: fixed;
-  bottom: 24px;
+  bottom: 104px;
   right: 24px;
   z-index: 9999;
+  user-select: none;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -102,4 +103,18 @@
 
 .ft-dash-link:hover {
   background: rgba(139, 92, 246, 0.22);
+}
+
+.ft-overlay.dragging {
+  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(139, 92, 246, 0.3);
+}
+
+@media (max-width: 480px) {
+  .ft-overlay {
+    bottom: 100px;
+    right: 12px;
+    left: 12px;
+    width: auto;
+    border-radius: 16px;
+  }
 }

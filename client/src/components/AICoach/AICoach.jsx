@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../../context/AuthContext.jsx';
 import './AICoach.css';
 
 const API_BASE = 'http://localhost:3000/api';
@@ -55,17 +56,15 @@ function MessageBubble({ msg }) {
 
 /* ── Main component ──────────────────────────────────────────────── */
 export default function AICoach() {
-  const [open, setOpen]           = useState(false);
-  const [messages, setMessages]   = useState([]);
-  const [input, setInput]         = useState('');
-  const [loading, setLoading]     = useState(false);
-  const [pos, setPos]             = useState({ x: 0, y: 0 }); // offset from bottom-right
-  const [dragging, setDragging]   = useState(false);
+  const { user } = useAuth();
+  const [open, setOpen]         = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [input, setInput]       = useState('');
+  const [loading, setLoading]   = useState(false);
+  const draggedRef              = useRef(false);
 
-  const messagesEndRef  = useRef(null);
-  const inputRef        = useRef(null);
-  const dragStart       = useRef(null);
-  const btnRef          = useRef(null);
+  const messagesEndRef = useRef(null);
+  const inputRef       = useRef(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -75,46 +74,17 @@ export default function AICoach() {
     if (open) setTimeout(() => inputRef.current?.focus(), 320);
   }, [open]);
 
-  /* ── Draggable button ─────────────────────────────────────────── */
-  const onMouseDown = (e) => {
-    e.preventDefault();
-    dragStart.current = {
-      mx: e.clientX, my: e.clientY,
-      px: pos.x,     py: pos.y,
-    };
-    setDragging(true);
-  };
-
-  useEffect(() => {
-    if (!dragging) return;
-    const onMove = (e) => {
-      const dx = e.clientX - dragStart.current.mx;
-      const dy = e.clientY - dragStart.current.my;
-      setPos({ x: dragStart.current.px + dx, y: dragStart.current.py + dy });
-    };
-    const onUp = (e) => {
-      setDragging(false);
-      // if barely moved, treat as click
-      const dist = Math.hypot(e.clientX - dragStart.current.mx, e.clientY - dragStart.current.my);
-      if (dist < 6) setOpen(v => !v);
-    };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
-    return () => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); };
-  }, [dragging]);
-
   /* ── Send message ─────────────────────────────────────────────── */
   const send = useCallback(async (text) => {
     const content = (text || input).trim();
     if (!content || loading) return;
 
-    const userMsg   = { role: 'user', content };
-    const history   = [...messages, userMsg];
+    const userMsg = { role: 'user', content };
+    const history = [...messages, userMsg];
     setMessages(history);
     setInput('');
     setLoading(true);
 
-    // Placeholder streaming message
     const streamId = `stream-${Date.now()}`;
     setMessages(prev => [...prev, { id: streamId, role: 'assistant', content: '', streaming: true }]);
 
@@ -122,6 +92,7 @@ export default function AICoach() {
       const res = await fetch(`${API_BASE}/ai/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({
           messages: history.map(m => ({ role: m.role, content: m.content })),
         }),
@@ -156,7 +127,6 @@ export default function AICoach() {
         }
       }
 
-      // Finalise — remove streaming flag
       setMessages(prev => prev.map(m =>
         m.id === streamId ? { ...m, content: full, streaming: false } : m
       ));
@@ -177,21 +147,20 @@ export default function AICoach() {
 
   const clearChat = () => setMessages([]);
 
-  const btnStyle = {
-    transform: `translate(${pos.x}px, ${pos.y}px)`,
-    cursor: dragging ? 'grabbing' : 'grab',
-  };
+  if (!user) return null;
 
   return (
     <>
       {/* ── Floating button ───────────────────────────────────────── */}
       <motion.div
-        ref={btnRef}
-        className={`ai-fab ${open ? 'open' : ''} ${dragging ? 'dragging' : ''}`}
-        style={btnStyle}
-        onMouseDown={onMouseDown}
-        animate={{ scale: dragging ? 1.08 : 1 }}
-        transition={{ type: 'spring', stiffness: 400, damping: 25 }}
+        className={`ai-fab ${open ? 'open' : ''}`}
+        drag
+        dragMomentum={false}
+        dragElastic={0}
+        onDragStart={() => { draggedRef.current = true; }}
+        onClick={() => { if (draggedRef.current) { draggedRef.current = false; return; } setOpen(v => !v); }}
+        whileDrag={{ scale: 1.08 }}
+        style={{ cursor: 'grab' }}
         title="Luma — AI Focus Coach"
       >
         <div className="ai-fab-glow" />
@@ -199,7 +168,7 @@ export default function AICoach() {
           <RobotIcon size={26} />
         </div>
         <AnimatePresence>
-          {!open && !dragging && (
+          {!open && (
             <motion.span
               className="ai-fab-pulse"
               initial={{ scale: 1, opacity: 0.6 }}
@@ -214,7 +183,6 @@ export default function AICoach() {
       <AnimatePresence>
         {open && (
           <>
-            {/* Backdrop (subtle) */}
             <motion.div
               className="ai-backdrop"
               initial={{ opacity: 0 }}

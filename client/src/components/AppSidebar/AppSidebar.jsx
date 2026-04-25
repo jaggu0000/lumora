@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile, getJoinedCommunities } from '../../api/userApi.js';
 import '../../pages/Dashboard.css';
@@ -7,7 +7,7 @@ import '../../pages/Dashboard.css';
 const getInitials = (name = '') =>
   name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
-export default function AppSidebar({ selectedCommunityId, onCommunitySelect, onExplore }) {
+export default function AppSidebar({ selectedCommunityId, onCommunitySelect, onExplore, isOpen, onClose }) {
   const navigate = useNavigate();
   const [user,              setUser]              = useState(null);
   const [joinedCommunities, setJoinedCommunities] = useState([]);
@@ -26,9 +26,25 @@ export default function AppSidebar({ selectedCommunityId, onCommunitySelect, onE
   };
 
   return (
-    <aside className="dash-sidebar">
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            className="sidebar-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            onClick={onClose}
+          />
+        )}
+      </AnimatePresence>
+      <aside className={`dash-sidebar${isOpen ? ' sidebar-open' : ''}`}>
       <div className="dash-logo">
         <span className="dash-logo-text">Lumora</span>
+        {onClose && (
+          <button className="sidebar-close-btn" onClick={onClose} aria-label="Close menu">✕</button>
+        )}
       </div>
 
       <nav className="dash-nav">
@@ -94,9 +110,9 @@ export default function AppSidebar({ selectedCommunityId, onCommunitySelect, onE
             <span className="dash-user-name">{user?.userId?.username ?? '—'}</span>
             <span className="dash-user-role">{user?.userId?.role ?? '—'}</span>
           </div>
-          <button className="dash-user-menu">⋯</button>
         </div>
       </div>
     </aside>
+    </>
   );
 }

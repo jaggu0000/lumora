@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import './CommunityChat.css';
 import VideoSession from '../VideoSession/VideoSession.jsx';
-import { leaveCommunity } from '../../api/communityApi.js';
+import { leaveCommunity, reportCommunity } from '../../api/communityApi.js';
 
 const SOCKET_URL = import.meta.env.VITE_BACKEND_URL?.replace('/api', '') || 'http://localhost:3000';
 const BASE_URL   = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api';
@@ -180,12 +180,103 @@ const TypingIndicator = ({ username }) => (
   </div>
 );
 
+const REASON_TYPES = [
+  'violation of community guidelines',
+  'Spam',
+  'Harassment',
+  'Inappropriate Content',
+  'Impersonation',
+  'Hate speech or Discrimination',
+  'Other',
+];
+
+function ReportCommunityModal({ community, onClose }) {
+  const [reasonType, setReasonType] = useState(REASON_TYPES[0]);
+  const [reason,     setReason]     = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [error,      setError]      = useState('');
+  const [success,    setSuccess]    = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!reason.trim()) { setError('Please describe the issue.'); return; }
+    setSubmitting(true);
+    setError('');
+    try {
+      await reportCommunity(community._id, reasonType, reason.trim());
+      setSuccess(true);
+    } catch (err) {
+      setError(err.message || 'Failed to submit report.');
+    }
+    setSubmitting(false);
+  };
+
+  return (
+    <div className="leave-confirm-overlay" onClick={onClose}>
+      <div className="report-modal" onClick={e => e.stopPropagation()}>
+        <div className="report-modal-header">
+          <h3 className="report-modal-title">Report Community</h3>
+          <button className="details-close-btn" onClick={onClose}>✕</button>
+        </div>
+
+        {success ? (
+          <div className="report-success">
+            <div className="report-success-icon">✓</div>
+            <p>Your report has been submitted. Our team will review it shortly.</p>
+            <button className="leave-confirm-cancel" onClick={onClose}>Close</button>
+          </div>
+        ) : (
+          <form className="report-form" onSubmit={handleSubmit}>
+            <div className="report-community-info">
+              <strong>{community.communityName}</strong>
+              <span className="details-tag"> #{community.communityTag}</span>
+            </div>
+
+            <label className="report-label">Reason</label>
+            <select
+              className="report-select"
+              value={reasonType}
+              onChange={e => setReasonType(e.target.value)}
+            >
+              {REASON_TYPES.map(r => (
+                <option key={r} value={r}>{r}</option>
+              ))}
+            </select>
+
+            <label className="report-label">Details <span className="report-chars">{reason.length}/500</span></label>
+            <textarea
+              className="report-textarea"
+              placeholder="Describe the issue in detail…"
+              value={reason}
+              maxLength={500}
+              rows={4}
+              onChange={e => setReason(e.target.value)}
+            />
+
+            {error && <p className="details-leave-err">{error}</p>}
+
+            <div className="leave-confirm-actions">
+              <button type="button" className="leave-confirm-cancel" onClick={onClose} disabled={submitting}>
+                Cancel
+              </button>
+              <button type="submit" className="report-submit-btn" disabled={submitting}>
+                {submitting ? 'Submitting…' : 'Submit Report'}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 /* ── Community Details Panel ─────────────────────────────────────── */
 function CommunityDetailsPanel({ community, messages, currentUser, onClose, onLeave }) {
   const [tab,          setTab]          = useState('about');
   const [leaving,      setLeaving]      = useState(false);
   const [leaveErr,     setLeaveErr]     = useState('');
   const [showConfirm,  setShowConfirm]  = useState(false);
+  const [showReport,   setShowReport]   = useState(false);
 
   const membersData   = community.membersData ?? [];
   const isAdmin       = membersData.find(m => m._id === currentUser._id)?.role === 'admin';
@@ -307,6 +398,12 @@ function CommunityDetailsPanel({ community, messages, currentUser, onClose, onLe
             {isAdmin && (
               <p className="details-admin-note">You are the admin of this community.</p>
             )}
+
+            <div className="details-report-section">
+              <button className="details-report-btn" onClick={() => setShowReport(true)}>
+                ⚑ Report Community
+              </button>
+            </div>
           </div>
         )}
 
@@ -380,6 +477,11 @@ function CommunityDetailsPanel({ community, messages, currentUser, onClose, onLe
           </div>
         )}
       </div>
+
+      {/* ── Report dialog ───────────────────────────────────────── */}
+      {showReport && (
+        <ReportCommunityModal community={community} onClose={() => setShowReport(false)} />
+      )}
 
       {/* ── Leave confirmation dialog ────────────────────────────── */}
       {showConfirm && (

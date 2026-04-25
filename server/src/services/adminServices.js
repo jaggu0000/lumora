@@ -79,7 +79,7 @@ export const getCommunityReports = async ({ status, page = 1, limit = 20 }) => {
 	const [reports, total] = await Promise.all([
 		CommunityReport.find(filter)
 			.populate({ path: "reportedBy", select: "username email", model: User })
-			.populate({ path: "reportedCommunity", select: "name", model: Community })
+			.populate({ path: "reportedCommunity", select: "communityName communityTag", model: Community })
 			.sort({ createdAt: -1 })
 			.skip(skip)
 			.limit(limit),

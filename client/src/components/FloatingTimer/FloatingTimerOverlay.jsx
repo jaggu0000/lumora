@@ -17,10 +17,15 @@ export default function FloatingTimerOverlay() {
       {visible && (
         <motion.div
           className="ft-overlay"
+          drag
+          dragMomentum={false}
+          dragElastic={0}
+          whileDrag={{ boxShadow: '0 16px 48px rgba(0,0,0,0.6), 0 0 0 1px rgba(139,92,246,0.35)', scale: 1.02 }}
           initial={{ opacity: 0, y: 24, scale: 0.9 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           exit={{ opacity: 0, y: 24, scale: 0.9 }}
           transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
+          style={{ cursor: 'grab' }}
         >
           <svg className="ft-ring" width="60" height="60" viewBox="0 0 60 60">
             <circle cx="30" cy="30" r="24" className="ft-ring-bg" />
@@ -43,13 +48,13 @@ export default function FloatingTimerOverlay() {
           </div>
 
           <div className="ft-controls">
-            <button className="ft-btn" onClick={() => setRunning(r => !r)} title={running ? 'Pause' : 'Resume'}>
+            <button className="ft-btn" onPointerDown={e => e.stopPropagation()} onClick={() => setRunning(r => !r)} title={running ? 'Pause' : 'Resume'}>
               {running ? '⏸' : '▶'}
             </button>
-            <button className="ft-btn ft-btn-stop" onClick={reset} title="Stop">⏹</button>
+            <button className="ft-btn ft-btn-stop" onPointerDown={e => e.stopPropagation()} onClick={reset} title="Stop">⏹</button>
           </div>
 
-          <button className="ft-dash-link" onClick={() => navigate('/dashboard')} title="Go to Dashboard">
+          <button className="ft-dash-link" onPointerDown={e => e.stopPropagation()} onClick={() => navigate('/dashboard')} title="Go to Dashboard">
             ⊞
           </button>
         </motion.div>

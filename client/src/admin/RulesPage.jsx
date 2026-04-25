@@ -2,7 +2,24 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import * as api from "../api/adminApi.js";
 
-function TagInput({ label, value, onChange }) {
+function Tag({ children, onRemove, color = "rose" }) {
+	const colors = {
+		rose: "bg-rose-50 text-rose-600 border-rose-200",
+		blue: "bg-blue-50 text-blue-600 border-blue-200",
+	};
+	return (
+		<span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border text-xs font-medium ${colors[color]}`}>
+			{children}
+			{onRemove && (
+				<button type="button" onClick={onRemove} className="hover:opacity-60 transition-opacity leading-none ml-0.5">
+					×
+				</button>
+			)}
+		</span>
+	);
+}
+
+function TagInput({ label, value, onChange, color }) {
 	const [input, setInput] = useState("");
 
 	const add = () => {
@@ -11,28 +28,27 @@ function TagInput({ label, value, onChange }) {
 		setInput("");
 	};
 
-	const remove = (i) => onChange(value.filter((_, idx) => idx !== i));
-
 	return (
 		<div>
-			<label className="text-xs font-medium text-[#9e6070] mb-1 block">{label} *</label>
-			<div className="flex flex-wrap gap-1.5 mb-2">
-				{value.map((v, i) => (
-					<span key={i} className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-[#C9184A]/10 text-[#C9184A] text-xs font-medium">
-						{v}
-						<button type="button" onClick={() => remove(i)} className="hover:text-red-600">×</button>
-					</span>
-				))}
-			</div>
+			<label className="text-xs font-semibold text-slate-500 mb-1.5 block">{label} *</label>
+			{value.length > 0 && (
+				<div className="flex flex-wrap gap-1.5 mb-2">
+					{value.map((v, i) => (
+						<Tag key={i} color={color} onRemove={() => onChange(value.filter((_, idx) => idx !== i))}>
+							{v}
+						</Tag>
+					))}
+				</div>
+			)}
 			<div className="flex gap-2">
 				<input
 					value={input}
 					onChange={(e) => setInput(e.target.value)}
 					onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); add(); } }}
-					className="flex-1 px-3 py-2 rounded-xl border border-[#E3AFBC]/60 bg-[#FDF4F7] text-[#1a0810] text-sm outline-none focus:border-[#C9184A]/50"
+					className="flex-1 px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-sm outline-none focus:border-rose-400 focus:bg-white transition-colors placeholder:text-slate-300"
 					placeholder="Type and press Enter or Add"
 				/>
-				<button type="button" onClick={add} className="px-3 py-2 rounded-xl border border-[#E3AFBC]/60 text-[#9e6070] text-sm hover:bg-[#F7EEF1]">
+				<button type="button" onClick={add} className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors">
 					Add
 				</button>
 			</div>
@@ -57,40 +73,50 @@ function RuleModal({ rule, onClose, onSave, loading }) {
 	};
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/20 backdrop-blur-sm">
+		<div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/30 backdrop-blur-sm p-4">
 			<motion.div
-				initial={{ scale: 0.95, opacity: 0 }}
-				animate={{ scale: 1, opacity: 1 }}
-				exit={{ scale: 0.95, opacity: 0 }}
-				className="bg-white rounded-2xl shadow-xl border border-[#E3AFBC]/60 w-full max-w-lg mx-4 p-6 max-h-[90vh] overflow-y-auto"
+				initial={{ opacity: 0, y: 20, scale: 0.97 }}
+				animate={{ opacity: 1, y: 0, scale: 1 }}
+				exit={{ opacity: 0, y: 20, scale: 0.97 }}
+				transition={{ duration: 0.2 }}
+				className="bg-white rounded-2xl shadow-2xl shadow-slate-200 border border-slate-100 w-full max-w-lg p-6 max-h-[90vh] overflow-y-auto"
 			>
-				<h2 className="text-lg font-semibold text-[#1a0810] mb-5">{rule ? "Edit Rule" : "New Rule"}</h2>
-				<form onSubmit={submit} className="space-y-4">
+				<div className="flex items-center justify-between mb-5">
+					<h2 className="text-base font-bold text-slate-800">{rule ? "Edit Rule" : "New Rule"}</h2>
+					<button onClick={onClose} className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100 transition-colors">
+						<svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M1 1l10 10M11 1L1 11" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+					</button>
+				</div>
+				<form onSubmit={submit} className="space-y-5">
 					<div>
-						<label className="text-xs font-medium text-[#9e6070] mb-1 block">Name *</label>
+						<label className="text-xs font-semibold text-slate-500 mb-1.5 block">Rule Name *</label>
 						<input
 							value={name}
 							onChange={(e) => setName(e.target.value)}
-							className="w-full px-3 py-2 rounded-xl border border-[#E3AFBC]/60 bg-[#FDF4F7] text-[#1a0810] text-sm outline-none focus:border-[#C9184A]/50"
+							className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-slate-800 text-sm outline-none focus:border-rose-400 focus:bg-white transition-colors placeholder:text-slate-300"
 							placeholder="e.g. No Spam Policy"
 						/>
 						{err.name && <p className="text-red-500 text-xs mt-1">{err.name}</p>}
 					</div>
 
-					<TagInput label="Conditions" value={conditions} onChange={setConditions} />
-					{err.conditions && <p className="text-red-500 text-xs -mt-2">{err.conditions}</p>}
+					<div>
+						<TagInput label="Conditions" value={conditions} onChange={setConditions} color="blue" />
+						{err.conditions && <p className="text-red-500 text-xs mt-1">{err.conditions}</p>}
+					</div>
 
-					<TagInput label="Actions" value={actions} onChange={setActions} />
-					{err.actions && <p className="text-red-500 text-xs -mt-2">{err.actions}</p>}
+					<div>
+						<TagInput label="Actions" value={actions} onChange={setActions} color="rose" />
+						{err.actions && <p className="text-red-500 text-xs mt-1">{err.actions}</p>}
+					</div>
 
-					<div className="flex gap-3 pt-2">
-						<button type="button" onClick={onClose} className="flex-1 py-2 rounded-xl border border-[#E3AFBC]/60 text-[#9e6070] text-sm hover:bg-[#F7EEF1]">
+					<div className="flex gap-3 pt-1">
+						<button type="button" onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-500 text-sm font-medium hover:bg-slate-50 transition-colors">
 							Cancel
 						</button>
 						<button
 							type="submit"
 							disabled={loading}
-							className="flex-1 py-2 rounded-xl bg-gradient-to-r from-[#C9184A] to-[#9D0035] text-white text-sm font-medium disabled:opacity-50"
+							className="flex-1 py-2.5 rounded-xl bg-linear-to-r from-[#C9184A] to-[#9D0035] text-white text-sm font-semibold disabled:opacity-50 shadow-sm shadow-rose-200 hover:opacity-90 transition-opacity"
 						>
 							{loading ? "Saving…" : rule ? "Update" : "Create"}
 						</button>
@@ -101,11 +127,20 @@ function RuleModal({ rule, onClose, onSave, loading }) {
 	);
 }
 
+function RulesIcon() {
+	return (
+		<svg width="22" height="22" viewBox="0 0 16 16" fill="none">
+			<rect x="2" y="2" width="12" height="12" rx="2" stroke="#C9184A" strokeWidth="1.3"/>
+			<path d="M5 6h6M5 9h4" stroke="#C9184A" strokeWidth="1.3" strokeLinecap="round"/>
+		</svg>
+	);
+}
+
 export default function RulesPage() {
 	const [rules, setRules] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
-	const [modal, setModal] = useState(null); // null | "new" | rule object
+	const [modal, setModal] = useState(null);
 	const [error, setError] = useState("");
 
 	const load = async () => {
@@ -151,30 +186,41 @@ export default function RulesPage() {
 
 	return (
 		<div>
-			<div className="flex items-center justify-between mb-6">
+			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
 				<div>
-					<h1 className="text-2xl font-bold text-[#1a0810]">Platform Rules</h1>
-					<p className="text-sm text-[#9e6070] mt-0.5">Define conditions and automated actions for the platform</p>
+					<h2 className="text-xl font-bold text-slate-800">Platform Rules</h2>
+					<p className="text-sm text-slate-400 mt-0.5">Define conditions and automated actions for the platform</p>
 				</div>
 				<motion.button
 					whileHover={{ scale: 1.02 }}
 					whileTap={{ scale: 0.97 }}
 					onClick={() => setModal("new")}
-					className="px-4 py-2 rounded-xl bg-gradient-to-r from-[#C9184A] to-[#9D0035] text-white text-sm font-medium shadow-[0_4px_16px_rgba(201,24,74,0.3)] flex items-center gap-2"
+					className="self-start sm:self-auto flex items-center gap-2 px-4 py-2.5 rounded-xl bg-linear-to-r from-[#C9184A] to-[#9D0035] text-white text-sm font-semibold shadow-md shadow-rose-200 hover:opacity-90 transition-opacity"
 				>
 					<svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2v12M2 8h12" stroke="white" strokeWidth="2" strokeLinecap="round"/></svg>
 					Add Rule
 				</motion.button>
 			</div>
 
-			{error && <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-sm">{error}</div>}
+			{error && (
+				<div className="mb-6 flex items-center gap-3 p-4 bg-red-50 border border-red-100 rounded-xl text-red-600 text-sm">
+					<svg width="16" height="16" viewBox="0 0 16 16" fill="none" className="shrink-0"><circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.3"/><path d="M8 5v3.5M8 10.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/></svg>
+					{error}
+				</div>
+			)}
 
 			{loading ? (
 				<div className="space-y-3">
-					{[...Array(4)].map((_, i) => <div key={i} className="h-28 rounded-2xl bg-[#E3AFBC]/20 animate-pulse" />)}
+					{[...Array(4)].map((_, i) => <div key={i} className="h-28 rounded-2xl bg-slate-100 animate-pulse" />)}
 				</div>
 			) : rules.length === 0 ? (
-				<div className="text-center py-20 text-[#c89faa]">No rules yet. Create one above.</div>
+				<div className="flex flex-col items-center justify-center py-24 text-center">
+					<div className="w-14 h-14 rounded-2xl bg-rose-50 border border-rose-100 flex items-center justify-center mb-4">
+						<RulesIcon />
+					</div>
+					<p className="text-slate-500 font-medium text-sm">No rules yet</p>
+					<p className="text-slate-400 text-xs mt-1">Create your first platform rule above</p>
+				</div>
 			) : (
 				<div className="space-y-3">
 					<AnimatePresence>
@@ -185,38 +231,42 @@ export default function RulesPage() {
 								initial={{ opacity: 0, y: 8 }}
 								animate={{ opacity: 1, y: 0 }}
 								exit={{ opacity: 0, x: -20 }}
-								className="bg-white border border-[#E3AFBC]/40 rounded-2xl p-5 group"
+								className="group bg-white border border-slate-100 rounded-2xl p-5 hover:border-rose-200 hover:shadow-md hover:shadow-rose-50 transition-all duration-200"
 							>
 								<div className="flex items-start justify-between gap-4">
-									<p className="font-semibold text-[#1a0810]">{r.name}</p>
-									<div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
-										<button onClick={() => setModal(r)} className="p-1.5 rounded-lg text-[#c89faa] hover:text-[#C9184A] hover:bg-[#F7EEF1]">
-											<svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+									<p className="font-semibold text-slate-800 text-sm">{r.name}</p>
+									<div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
+										<button
+											onClick={() => setModal(r)}
+											className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-rose-500 hover:bg-rose-50 transition-all"
+											title="Edit"
+										>
+											<svg width="13" height="13" viewBox="0 0 16 16" fill="none">
 												<path d="M11.3 2.7a1.5 1.5 0 012.1 2.1L5 13.2l-3 .8.8-3 8.5-8.3z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round"/>
 											</svg>
 										</button>
-										<button onClick={() => handleDelete(r._id)} className="p-1.5 rounded-lg text-[#c89faa] hover:text-red-500 hover:bg-red-50">
-											<svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+										<button
+											onClick={() => handleDelete(r._id)}
+											className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-300 hover:text-red-500 hover:bg-red-50 transition-all"
+											title="Delete"
+										>
+											<svg width="13" height="13" viewBox="0 0 16 16" fill="none">
 												<path d="M3 4h10M6 4V3h4v1M5 4l.5 9h5L11 4" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
 											</svg>
 										</button>
 									</div>
 								</div>
-								<div className="mt-3 grid grid-cols-2 gap-4">
+								<div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
 									<div>
-										<p className="text-xs text-[#9e6070] font-medium mb-1.5">Conditions</p>
-										<div className="flex flex-wrap gap-1">
-											{r.conditions.map((c, i) => (
-												<span key={i} className="px-2 py-0.5 rounded-md bg-blue-50 text-blue-600 text-xs">{c}</span>
-											))}
+										<p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Conditions</p>
+										<div className="flex flex-wrap gap-1.5">
+											{r.conditions.map((c, i) => <Tag key={i} color="blue">{c}</Tag>)}
 										</div>
 									</div>
 									<div>
-										<p className="text-xs text-[#9e6070] font-medium mb-1.5">Actions</p>
-										<div className="flex flex-wrap gap-1">
-											{r.actions.map((a, i) => (
-												<span key={i} className="px-2 py-0.5 rounded-md bg-[#C9184A]/10 text-[#C9184A] text-xs">{a}</span>
-											))}
+										<p className="text-[11px] font-semibold text-slate-400 uppercase tracking-wider mb-2">Actions</p>
+										<div className="flex flex-wrap gap-1.5">
+											{r.actions.map((a, i) => <Tag key={i} color="rose">{a}</Tag>)}
 										</div>
 									</div>
 								</div>

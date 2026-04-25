@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
-import AICoach from '../components/AICoach/AICoach.jsx';
 import AppSidebar from '../components/AppSidebar/AppSidebar.jsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { getUserProfile, getTodos, getCompletedTodos, addTodo, editTodo, deleteTodo, toggleTodo, getJoinedCommunities, getPublicCommunities } from '../api/userApi.js';
 import { joinCommunity } from '../api/communityApi.js';
 import { useTimer, POMO_MODE_DEFS } from '../context/TimerContext.jsx';
+import { useAuth } from '../context/AuthContext.jsx';
 import './Dashboard.css';
 
 /* ── Date helpers ────────────────────────────────────────────────── */
@@ -369,6 +369,7 @@ function TodoWidget({ todos, setTodos, completedTodos, setCompletedTodos, onComp
   const [editingId, setEditingId] = useState(null);
   const [form,      setForm]      = useState(BLANK_FORM);
   const [saving,    setSaving]    = useState(false);
+  const [collapsed, setCollapsed] = useState(false);
 
   const today = todayTs();
 
@@ -465,11 +466,14 @@ function TodoWidget({ todos, setTodos, completedTodos, setCompletedTodos, onComp
         </div>
         <div className="todo-header-right">
           <span className="todo-progress">{progressDone}/{progressTotal}</span>
-          {tab !== 'completed' && (
+          {tab !== 'completed' && !collapsed && (
             <button className="todo-add-icon-btn" onClick={showForm && !editingId ? closeForm : openAdd}>
               <span>{showForm && !editingId ? '✕' : '+'}</span>
             </button>
           )}
+          <button className="todo-collapse-btn" onClick={() => { setCollapsed(v => !v); setShowForm(false); }} title={collapsed ? 'Expand' : 'Collapse'}>
+            {collapsed ? '▾' : '▴'}
+          </button>
         </div>
       </div>
 
@@ -478,7 +482,7 @@ function TodoWidget({ todos, setTodos, completedTodos, setCompletedTodos, onComp
       </div>
 
       <AnimatePresence>
-        {showForm && tab !== 'completed' && (
+        {!collapsed && showForm && tab !== 'completed' && (
           <motion.div
             className="todo-form"
             initial={{ opacity: 0, height: 0 }}
@@ -516,7 +520,7 @@ function TodoWidget({ todos, setTodos, completedTodos, setCompletedTodos, onComp
         )}
       </AnimatePresence>
 
-      <div className="todo-list">
+      {!collapsed && <div className="todo-list">
         <AnimatePresence>
           {displayList.length === 0 && (
             <div className="todo-empty">{emptyMsg}</div>
@@ -556,7 +560,7 @@ function TodoWidget({ todos, setTodos, completedTodos, setCompletedTodos, onComp
             );
           })}
         </AnimatePresence>
-      </div>
+      </div>}
     </div>
   );
 }
@@ -564,12 +568,24 @@ function TodoWidget({ todos, setTodos, completedTodos, setCompletedTodos, onComp
 /* ── Main Dashboard ──────────────────────────────────────────────── */
 export default function Dashboard() {
   const navigate  = useNavigate();
+  const { logout } = useAuth();
   const { focusSeconds } = useTimer();
+
+  const handleLogout = async () => {
+    try {
+      const BASE = import.meta.env.VITE_BACKEND_URL;
+      await fetch(`${BASE}/auth/logout`, { method: 'POST', credentials: 'include' });
+    } finally {
+      logout();
+      navigate('/login', { replace: true });
+    }
+  };
   const [user,           setUser]           = useState(null);
   const [todos,          setTodos]          = useState([]);
   const [completedTodos, setCompletedTodos] = useState([]);
   const [communities,    setCommunities]    = useState([]);
   const [showExplore,    setShowExplore]    = useState(false);
+  const [sidebarOpen,    setSidebarOpen]    = useState(false);
 
   const fetchUser           = useCallback(() => getUserProfile().then(({ userMetadata }) => setUser(userMetadata)).catch(console.error), []);
   const fetchTodos          = useCallback(() => getTodos().then(({ data }) => setTodos(data)).catch(console.error), []);
@@ -580,19 +596,25 @@ export default function Dashboard() {
 
   return (
     <div className="dash-root">
-      <AICoach />
       {/* background orbs */}
       <div className="dash-orb dash-orb-1" />
       <div className="dash-orb dash-orb-2" />
 
       {/* ── Sidebar ─────────────────────────────────────────────── */}
-      <AppSidebar onExplore={() => setShowExplore(true)} />
+      <AppSidebar
+        onExplore={() => { setShowExplore(true); setSidebarOpen(false); }}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
       {/* ── Main Content ────────────────────────────────────────── */}
       <main className="dash-main">
 
         {/* Top bar */}
         <header className="dash-topbar">
+          <button className="dash-hamburger" onClick={() => setSidebarOpen(true)} aria-label="Open menu">
+            <span /><span /><span />
+          </button>
           <div className="dash-topbar-left">
             <h1 className="dash-greeting">
               Good {new Date().getHours() < 12 ? 'morning' : new Date().getHours() < 17 ? 'afternoon' : 'evening'},
@@ -603,8 +625,7 @@ export default function Dashboard() {
             </p>
           </div>
           <div className="dash-topbar-right">
-            <button className="dash-icon-btn">🔔</button>
-            <button className="dash-icon-btn">⚙</button>
+            <button className="dash-logout-btn" onClick={handleLogout}>Log Out</button>
           </div>
         </header>
 

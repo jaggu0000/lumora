@@ -10,31 +10,44 @@ import RulesPage from './admin/RulesPage.jsx'
 import UserReportsPage from './admin/UserReportsPage.jsx'
 import CommunityReportsPage from './admin/CommunityReportsPage.jsx'
 import { TimerProvider } from './context/TimerContext.jsx'
+import { AuthProvider } from './context/AuthContext.jsx'
+import { RequireAuth, RequireAdmin, GuestOnly } from './components/RouteGuards.jsx'
 import FloatingTimerOverlay from './components/FloatingTimer/FloatingTimerOverlay.jsx'
+import AICoach from './components/AICoach/AICoach.jsx'
 
 const App = () => {
   return (
     <Router>
-      <TimerProvider>
-        <div className="App">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<AuthPage />} />
-            <Route path="/signup" element={<AuthPage />} />
-            <Route path="/community" element={<CommunityPage />} />
-            <Route path="/dashboard" element={<Dashboard />} />
+      <AuthProvider>
+        <TimerProvider>
+          <div className="App">
+            <Routes>
+              {/* Guest-only: redirect logged-in users to their home */}
+              <Route path="/" element={<GuestOnly><LandingPage /></GuestOnly>} />
+              <Route path="/login" element={<GuestOnly><AuthPage /></GuestOnly>} />
+              <Route path="/signup" element={<GuestOnly><AuthPage /></GuestOnly>} />
 
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<Navigate to="/admin/achievements" replace />} />
-              <Route path="achievements" element={<AchievementsPage />} />
-              <Route path="rules" element={<RulesPage />} />
-              <Route path="user-reports" element={<UserReportsPage />} />
-              <Route path="community-reports" element={<CommunityReportsPage />} />
-            </Route>
-          </Routes>
-          <FloatingTimerOverlay />
-        </div>
-      </TimerProvider>
+              {/* Regular authenticated users */}
+              <Route path="/dashboard" element={<RequireAuth><Dashboard /></RequireAuth>} />
+              <Route path="/community" element={<RequireAuth><CommunityPage /></RequireAuth>} />
+
+              {/* Admin-only routes */}
+              <Route path="/admin" element={<RequireAdmin><AdminLayout /></RequireAdmin>}>
+                <Route index element={<Navigate to="/admin/achievements" replace />} />
+                <Route path="achievements" element={<AchievementsPage />} />
+                <Route path="rules" element={<RulesPage />} />
+                <Route path="user-reports" element={<UserReportsPage />} />
+                <Route path="community-reports" element={<CommunityReportsPage />} />
+              </Route>
+
+              {/* Catch-all */}
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            <FloatingTimerOverlay />
+            <AICoach />
+          </div>
+        </TimerProvider>
+      </AuthProvider>
     </Router>
   )
 }

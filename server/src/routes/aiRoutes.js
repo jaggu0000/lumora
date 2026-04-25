@@ -1,9 +1,13 @@
 import express from "express";
 import env from "../config/env.js";
+import { authenticate } from "../middlewares/authMiddleware.js";
+import { fetchUserProfile, fetchJoinedCommunities } from "../services/userServices.js";
+import { getAllTodoOfUser, getAllCompletedTodosOfUser } from "../services/todoServices.js";
+import { getTodayFocusSeconds } from "../services/timerServices.js";
 
 const router = express.Router();
 
-const SYSTEM_PROMPT = `You are Luma, an AI Focus Coach built into Lumora — a productivity platform for deep work and focus.
+const BASE_SYSTEM_PROMPT = `You are Luma, an AI Focus Coach built into Lumora — a productivity platform for deep work and focus.
 
 Your personality:
 - Calm, encouraging, and insightful
@@ -21,7 +25,53 @@ Your capabilities:
 
 Always respond in plain text. No markdown headers. Use short bullet points (–) only when listing steps. Keep responses under 120 words unless the user asks for detail.`;
 
-router.post("/chat", async (req, res) => {
+async function buildUserContext(userId) {
+	const [profile, pendingTodos, completedTodos, todaySeconds, communities] = await Promise.all([
+		fetchUserProfile(userId).catch(() => null),
+		getAllTodoOfUser(userId).catch(() => []),
+		getAllCompletedTodosOfUser(userId).catch(() => []),
+		getTodayFocusSeconds(userId).catch(() => 0),
+		fetchJoinedCommunities(userId).catch(() => []),
+	]);
+
+	const username = profile?.userId?.username || "the user";
+	const streak = profile?.streakCount ?? 0;
+	const maxStreak = profile?.maxStreakCount ?? 0;
+	const todayMinutes = Math.round(todaySeconds / 60);
+
+	const formatTask = (t) => {
+		let line = `– ${t.title}`;
+		if (t.description) line += `: ${t.description}`;
+		if (t.dueDate) line += ` (due ${new Date(t.dueDate).toLocaleDateString()})`;
+		return line;
+	};
+
+	const pendingList = pendingTodos.length
+		? pendingTodos.map(formatTask).join("\n")
+		: "None";
+
+	const recentCompleted = completedTodos.slice(-5);
+	const completedList = recentCompleted.length
+		? recentCompleted.map((t) => `– ${t.title}`).join("\n")
+		: "None";
+
+	const communityList = communities.length
+		? communities.map((c) => c.communityName).join(", ")
+		: "None";
+
+	return `--- USER CONTEXT (use this to personalise your answer) ---
+Name: ${username}
+Current streak: ${streak} day${streak !== 1 ? "s" : ""} (best: ${maxStreak})
+Focus time today: ${todayMinutes} minute${todayMinutes !== 1 ? "s" : ""}
+Pending tasks (${pendingTodos.length}):
+${pendingList}
+Recently completed tasks:
+${completedList}
+Communities joined: ${communityList}
+--- END USER CONTEXT ---`;
+}
+
+router.post("/chat", authenticate, async (req, res) => {
 	const { messages } = req.body;
 
 	if (!messages || !Array.isArray(messages)) {
@@ -31,6 +81,9 @@ router.post("/chat", async (req, res) => {
 	if (!env.OPENROUTER_API_KEY) {
 		return res.status(500).json({ error: "AI service not configured" });
 	}
+
+	const userContext = await buildUserContext(req.auth.userId);
+	const systemPrompt = `${BASE_SYSTEM_PROMPT}\n\n${userContext}`;
 
 	try {
 		const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
@@ -44,7 +97,7 @@ router.post("/chat", async (req, res) => {
 			body: JSON.stringify({
 				model: "meta-llama/llama-3.1-8b-instruct:free",
 				messages: [
-					{ role: "system", content: SYSTEM_PROMPT },
+					{ role: "system", content: systemPrompt },
 					...messages,
 				],
 				stream: true,
@@ -58,7 +111,6 @@ router.post("/chat", async (req, res) => {
 			return res.status(response.status).json({ error: err });
 		}
 
-		// Stream SSE back to client
 		res.setHeader("Content-Type", "text/event-stream");
 		res.setHeader("Cache-Control", "no-cache");
 		res.setHeader("Connection", "keep-alive");
@@ -71,7 +123,7 @@ router.post("/chat", async (req, res) => {
 			if (done) break;
 
 			const chunk = decoder.decode(value, { stream: true });
-			const lines  = chunk.split("\n").filter(l => l.trim());
+			const lines = chunk.split("\n").filter(l => l.trim());
 
 			for (const line of lines) {
 				if (!line.startsWith("data:")) continue;
@@ -81,7 +133,7 @@ router.post("/chat", async (req, res) => {
 					continue;
 				}
 				try {
-					const json  = JSON.parse(data);
+					const json = JSON.parse(data);
 					const delta = json.choices?.[0]?.delta?.content;
 					if (delta) {
 						res.write(`data: ${JSON.stringify({ content: delta })}\n\n`);

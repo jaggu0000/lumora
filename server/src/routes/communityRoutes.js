@@ -1,6 +1,6 @@
 import express from "express";
 import { communityCreationValidation } from "../validators/communityValidator.js";
-import { createCommunity, getCommunityDetails, joinCommunity, joinUsingInviteCode, leaveCommunity } from "../controllers/communityController.js";
+import { createCommunity, getCommunityDetails, joinCommunity, joinUsingInviteCode, leaveCommunity, reportCommunity } from "../controllers/communityController.js";
 import {
 	addmoderator,
 	blockUsers,
@@ -21,6 +21,7 @@ communityRouter.post("/create", communityCreationValidation, createCommunity); /
 communityRouter.patch("/join/invite-code" ,joinUsingInviteCode); // Join community using invite code
 communityRouter.patch("/join/:communityId", joinCommunity); // Join community
 communityRouter.patch("/leave/:communityId", leaveCommunity); // Leave community
+communityRouter.post("/report/:communityId", reportCommunity); // Report community
 communityRouter.get("/:communityId", getCommunityDetails); // Get community details + members
 
 // community admin routes

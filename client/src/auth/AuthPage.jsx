@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
-import { saveToken } from "../api/token";
+import { useAuth } from "../context/AuthContext";
 import './auth.css';
 
 const BASE = import.meta.env.VITE_BACKEND_URL;
@@ -119,6 +119,7 @@ export default function AuthPage() {
 
 function LoginForm({ switchMode }) {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [focused, setFocused]           = useState("");
   const [formData, setFormData]         = useState({ identifier: "", password: "" });
@@ -150,8 +151,9 @@ function LoginForm({ switchMode }) {
       });
       const data = await res.json();
       if (res.ok) {
-        if (data.token) saveToken(data.token);
-        navigate("/dashboard");
+        login(data.token, data.data);
+        const dest = data.data?.role === "admin" ? "/admin" : "/dashboard";
+        navigate(dest, { replace: true });
       } else if (data.errors) {
         const se = {};
         data.errors.forEach(e => { se[e.path] = e.msg; });
@@ -246,6 +248,7 @@ function LoginForm({ switchMode }) {
 
 function SignupForm({ switchMode }) {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirm, setShowConfirm]   = useState(false);
   const [focused, setFocused]           = useState("");
@@ -289,8 +292,9 @@ function SignupForm({ switchMode }) {
       });
       const data = await res.json();
       if (res.ok) {
-        if (data.token) saveToken(data.token);
-        switchMode("login");
+        // After signup, redirect straight in (role will be "user" for new accounts)
+        login(data.token, data.data);
+        navigate("/dashboard", { replace: true });
       } else if (data.errors) {
         const se = {};
         data.errors.forEach(e => { se[e.path] = e.msg; });

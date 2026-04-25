@@ -28,3 +28,6 @@ export const joinCommunity = (communityId) =>
 
 export const leaveCommunity = (communityId) =>
 	handle(axios.patch(`${BASE}/leave/${communityId}`, {}, { withCredentials: true, headers: headers() }));
+
+export const reportCommunity = (communityId, reasonType, reason) =>
+	handle(axios.post(`${BASE}/report/${communityId}`, { reasonType, reason }, { withCredentials: true, headers: headers() }));
