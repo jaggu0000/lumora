@@ -82,3 +82,11 @@ export const resolveCommunityReport = (id, status) =>
 			{ withCredentials: true, headers: headers() }
 		)
 	);
+
+export const deleteReportedCommunity = (communityId) =>
+	handle(
+		axios.delete(`${BASE}/admin/communities/${communityId}`, {
+			withCredentials: true,
+			headers: headers(),
+		})
+	);
