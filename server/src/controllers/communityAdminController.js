@@ -7,6 +7,7 @@ import {
 	transferCommunityAdmin,
 	updateCommunityRules,
 	blockCommunityUsers,
+	approveCommunityJoinRequest,
 	fetchAllJoinRequests,
 	setNewInviteCode,
 } from "../services/communityAdminServices.js";
@@ -128,6 +129,18 @@ export const fetchJoinRequests = async (req, res) => {
 		const { communityId } = req.params;
 		const joinRequests = await fetchAllJoinRequests(communityId, userId);
 		res.status(200).json({ success: true, joinRequests });
+	} catch (error) {
+		res.status(500).json({ success: false, error: error.message });
+	}
+};
+
+// Approve a join request
+export const approveJoinRequest = async (req, res) => {
+	try {
+		const { userId } = req.auth;
+		const { communityId, requestUserId } = req.params;
+		await approveCommunityJoinRequest(communityId, userId, requestUserId);
+		res.status(200).json({ success: true, message: "Join request approved successfully" });
 	} catch (error) {
 		res.status(500).json({ success: false, error: error.message });
 	}

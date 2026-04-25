@@ -1,26 +1,26 @@
-import { addNewUser, loginUser } from "../services/authServices.js";
+import {
+	addNewUser,
+	loginUser,
+	verifySignupOtp,
+	resendSignupOtp,
+	sendForgotPasswordOtp,
+	resetPassword,
+} from "../services/authServices.js";
 import { generateToken } from "../utils/tokenUtils.js";
 
-// User Signup
+const cookieOptions = (isProduction) => ({
+	httpOnly: true,
+	secure: isProduction,
+	sameSite: isProduction ? "none" : "strict",
+});
+
+// User Signup — creates user, sends OTP, does NOT set cookie
 export const signup = async (req, res) => {
 	try {
-		const user = await addNewUser(req.body);
-		const token = generateToken(user);
-		const { username, email, role } = user;
-
-		// Set token in HTTP-only cookie
-		const isProduction = process.env.NODE_ENV === "production";
-		res.cookie("token", token, {
-			httpOnly: true,
-			secure: isProduction,
-			sameSite: isProduction ? "none" : "strict",
-		});
-
+		await addNewUser(req.body);
 		res.status(201).json({
 			status: "Success",
-			message: "User registered successfully",
-			token,
-			data: { username, email, role },
+			message: "OTP sent to your email. Please verify your account.",
 		});
 	} catch (error) {
 		res.status(500).json({
@@ -31,19 +31,69 @@ export const signup = async (req, res) => {
 	}
 };
 
-//user Login
+// Verify OTP after signup
+export const verifyOtp = async (req, res) => {
+	try {
+		const { email, otp } = req.body;
+		if (!email || !otp) return res.status(400).json({ success: false, message: "Email and OTP are required" });
+
+		await verifySignupOtp(email, otp);
+		res.status(200).json({ success: true, message: "Email verified successfully. You can now log in." });
+	} catch (error) {
+		res.status(400).json({ success: false, message: error.message });
+	}
+};
+
+// Resend signup OTP
+export const resendOtp = async (req, res) => {
+	try {
+		const { email } = req.body;
+		if (!email) return res.status(400).json({ success: false, message: "Email is required" });
+
+		await resendSignupOtp(email);
+		res.status(200).json({ success: true, message: "OTP resent successfully" });
+	} catch (error) {
+		res.status(400).json({ success: false, message: error.message });
+	}
+};
+
+// Forgot password — sends OTP to email
+export const forgotPassword = async (req, res) => {
+	try {
+		const { email } = req.body;
+		if (!email) return res.status(400).json({ success: false, message: "Email is required" });
+
+		await sendForgotPasswordOtp(email);
+		res.status(200).json({ success: true, message: "OTP sent to your email" });
+	} catch (error) {
+		res.status(400).json({ success: false, message: error.message });
+	}
+};
+
+// Reset password — validate OTP and set new password
+export const resetPasswordHandler = async (req, res) => {
+	try {
+		const { email, otp, newPassword } = req.body;
+		if (!email || !otp || !newPassword)
+			return res.status(400).json({ success: false, message: "Email, OTP, and new password are required" });
+		if (newPassword.length < 6)
+			return res.status(400).json({ success: false, message: "Password must be at least 6 characters" });
+
+		await resetPassword(email, otp, newPassword);
+		res.status(200).json({ success: true, message: "Password reset successfully. You can now log in." });
+	} catch (error) {
+		res.status(400).json({ success: false, message: error.message });
+	}
+};
+
+// User Login
 export const login = async (req, res) => {
 	try {
 		const { identifier, password } = req.body;
 		const { user, token } = await loginUser(identifier, password);
 
-		// Set token in HTTP-only cookie
 		const isProduction = process.env.NODE_ENV === "production";
-		res.cookie("token", token, {
-			httpOnly: true,
-			secure: isProduction,
-			sameSite: isProduction ? "none" : "strict",
-		});
+		res.cookie("token", token, cookieOptions(isProduction));
 
 		res.status(200).json({
 			success: true,
@@ -55,24 +105,20 @@ export const login = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		res.status(401).json({
+		const isUnverified = error.message.includes("verify your email");
+		res.status(isUnverified ? 403 : 401).json({
 			success: false,
-			message: "Login failed",
-			error: error.message,
+			message: error.message,
+			unverified: isUnverified,
 		});
 	}
 };
 
-// User LogOut
+// User Logout
 export const logout = async (req, res) => {
 	try {
-		// remove cookie
 		const isProduction = process.env.NODE_ENV === "production";
-		res.clearCookie("token", {
-			httpOnly: true,
-			secure: isProduction,
-			sameSite: isProduction ? "none" : "strict",
-		});
+		res.clearCookie("token", cookieOptions(isProduction));
 		res.status(200).json({ success: true, message: "Logged out successfully" });
 	} catch (error) {
 		res.status(500).json({ success: false, error: error.message });

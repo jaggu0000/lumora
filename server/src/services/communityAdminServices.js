@@ -6,12 +6,15 @@ import { addUserToCommunity, findCommunity } from "./communityServices.js";
 
 // Check if the requesting user is the community admin
 export const checkIfCommunityAdmin = (community, userId) => {
-	if (community.communityAdmin.toString() !== userId) throw new Error("not the community admin");
+	if (!community.communityAdmin || community.communityAdmin.toString() !== userId)
+		throw new Error("not the community admin");
 };
 
 // Check if the requesting user is a community admin or moderator
 export const checkIfAdminOrModerator = (community, userId) => {
-	if (!(community.communityAdmin.toString() === userId || community.moderators.some((id) => id.toString() === userId)))
+	const isAdmin = community.communityAdmin && community.communityAdmin.toString() === userId;
+	const isModerator = (community.moderators || []).some((id) => id && id.toString() === userId);
+	if (!(isAdmin || isModerator))
 		throw new Error("not the community admin or moderator");
 };
 
@@ -185,6 +188,44 @@ export const blockCommunityUsers = async (userId, communityId, blockUserId) => {
 export const fetchAllJoinRequests = async (communityId, userId) => {
 	const community = await findCommunity(communityId);
 	checkIfAdminOrModerator(community, userId);
-	if (!community.joinRequests || community.joinRequests.length === 0) return [];
-	return community.joinRequests;
+	const pendingJoinRequests = (community.joinRequests || []).filter(Boolean);
+	if (pendingJoinRequests.length === 0) return [];
+
+	const users = await User.find({ _id: { $in: pendingJoinRequests } }, "username");
+	const usersMap = new Map(users.map((user) => [user._id.toString(), user.username]));
+
+	return pendingJoinRequests.map((requestUserId) => {
+		const id = requestUserId.toString();
+		return {
+			_id: id,
+			username: usersMap.get(id) || "Unknown",
+		};
+	});
+};
+
+// approve a pending join request
+export const approveCommunityJoinRequest = async (communityId, adminUserId, requestUserId) => {
+	const community = await findCommunity(communityId);
+	checkIfAdminOrModerator(community, adminUserId);
+
+	const requestedUserId = requestUserId.toString();
+	const requestedUser = await User.findById(requestUserId);
+	if (!requestedUser) throw new Error("Requested user not found");
+
+	if (!community.joinRequests.some((id) => id.toString() === requestedUserId))
+		throw new Error("Join request not found");
+
+	const userMetadata = await UserMetadata.findOne({ userId: requestUserId });
+	if (!userMetadata) throw new Error("User metadata not found");
+
+	if (!community.members.some((id) => id && id.toString() === requestedUserId))
+		community.members.push(requestedUser._id);
+
+	community.joinRequests = community.joinRequests.filter((id) => id && id.toString() !== requestedUserId);
+
+	if (!(userMetadata.joinedCommunities || []).some((id) => id && id.toString() === community._id.toString()))
+		userMetadata.joinedCommunities.push(community._id);
+
+	await userMetadata.save();
+	await community.save();
 };

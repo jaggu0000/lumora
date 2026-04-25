@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { io } from 'socket.io-client';
 import './CommunityChat.css';
 import VideoSession from '../VideoSession/VideoSession.jsx';
-import { leaveCommunity, reportCommunity } from '../../api/communityApi.js';
+import { approveCommunityJoinRequest, fetchCommunityJoinRequests, leaveCommunity, reportCommunity } from '../../api/communityApi.js';
 
 const SOCKET_URL = import.meta.env.VITE_BACKEND_URL?.replace('/api', '') || 'http://localhost:3000';
 const BASE_URL   = import.meta.env.VITE_BACKEND_URL || 'http://localhost:3000/api';
@@ -49,6 +49,18 @@ const isImageUrl = (url = '') =>
 
 const resolveUrl = (url) =>
   url?.startsWith('http') ? url : `${BASE_URL.replace('/api', '')}${url}`;
+
+const NON_MEDIA_FILE_ACCEPT =
+  '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.rtf,.csv,.zip,.rar,.7z,.tar,.gz,.json,.xml,.md,.fig,.sketch,.psd,.ai,.eps,.js,.jsx,.ts,.tsx,.css,.scss,.sass,.html,.htm';
+
+const getFileCategory = (file) => {
+  const mimeType = file?.type || '';
+
+  if (mimeType.startsWith('image/')) return 'image';
+  if (mimeType.startsWith('video/')) return 'video';
+  if (mimeType.startsWith('audio/')) return 'audio';
+  return 'file';
+};
 
 /* ── Sub-components ──────────────────────────────────────────────── */
 const Avatar = ({ userId, name, size = 34, className = '' }) => (
@@ -271,12 +283,16 @@ function ReportCommunityModal({ community, onClose }) {
 }
 
 /* ── Community Details Panel ─────────────────────────────────────── */
-function CommunityDetailsPanel({ community, messages, currentUser, onClose, onLeave }) {
+function CommunityDetailsPanel({ community, messages, currentUser, onClose, onLeave, onCommunityUpdated }) {
   const [tab,          setTab]          = useState('about');
   const [leaving,      setLeaving]      = useState(false);
   const [leaveErr,     setLeaveErr]     = useState('');
   const [showConfirm,  setShowConfirm]  = useState(false);
   const [showReport,   setShowReport]   = useState(false);
+  const [joinRequests, setJoinRequests] = useState([]);
+  const [loadingRequests, setLoadingRequests] = useState(false);
+  const [approvingRequestId, setApprovingRequestId] = useState(null);
+  const [requestsError, setRequestsError] = useState('');
 
   const membersData   = community.membersData ?? [];
   const isAdmin       = membersData.find(m => m._id === currentUser._id)?.role === 'admin';
@@ -287,6 +303,29 @@ function CommunityDetailsPanel({ community, messages, currentUser, onClose, onLe
   const fileMessages = messages.filter(m =>
     m.attachments?.some(a => !isImageUrl(a.url) && a.type !== 'image')
   );
+
+  useEffect(() => {
+    if (!isAdmin || tab !== 'requests') return;
+
+    let cancelled = false;
+    setLoadingRequests(true);
+    setRequestsError('');
+
+    fetchCommunityJoinRequests(community._id)
+      .then(({ joinRequests: pendingRequests = [] }) => {
+        if (!cancelled) setJoinRequests(pendingRequests);
+      })
+      .catch((error) => {
+        if (!cancelled) setRequestsError(error.message || 'Failed to load join requests.');
+      })
+      .finally(() => {
+        if (!cancelled) setLoadingRequests(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [community._id, isAdmin, tab]);
 
   const confirmLeave = async () => {
     setLeaving(true);
@@ -301,9 +340,25 @@ function CommunityDetailsPanel({ community, messages, currentUser, onClose, onLe
     setLeaving(false);
   };
 
+  const handleApproveRequest = async (requestUserId) => {
+    setApprovingRequestId(requestUserId);
+    setRequestsError('');
+
+    try {
+      await approveCommunityJoinRequest(community._id, requestUserId);
+      setJoinRequests((prev) => prev.filter((requestUser) => requestUser._id !== requestUserId));
+      await onCommunityUpdated?.();
+    } catch (error) {
+      setRequestsError(error.message || 'Failed to approve join request.');
+    }
+
+    setApprovingRequestId(null);
+  };
+
   const TABS = [
     { key: 'about',   label: 'About'   },
     { key: 'members', label: `Members (${membersData.length})` },
+    ...(isAdmin ? [{ key: 'requests', label: `Requests (${joinRequests.length})` }] : []),
     { key: 'media',   label: 'Media'   },
     { key: 'files',   label: 'Files'   },
   ];
@@ -432,6 +487,44 @@ function CommunityDetailsPanel({ community, messages, currentUser, onClose, onLe
           </div>
         )}
 
+        {tab === 'requests' && isAdmin && (
+          <div className="details-requests-list">
+            {loadingRequests && (
+              <p className="details-empty">Loading join requests...</p>
+            )}
+
+            {!loadingRequests && requestsError && (
+              <p className="details-request-error">{requestsError}</p>
+            )}
+
+            {!loadingRequests && !requestsError && joinRequests.length === 0 && (
+              <p className="details-empty">No pending join requests</p>
+            )}
+
+            {!loadingRequests && !requestsError && joinRequests.map((requestUser) => (
+              <div key={requestUser._id} className="details-request-row">
+                <div
+                  className="details-member-avatar"
+                  style={{ background: `linear-gradient(135deg, ${getAvatarColor(requestUser._id)}, ${getAvatarColor(requestUser._id + '_')}cc)` }}
+                >
+                  {getInitials(requestUser.username)}
+                </div>
+                <div className="details-member-info">
+                  <span className="details-member-name">{requestUser.username}</span>
+                  <span className="details-member-role">Pending join request</span>
+                </div>
+                <button
+                  className="details-request-approve-btn"
+                  onClick={() => handleApproveRequest(requestUser._id)}
+                  disabled={approvingRequestId === requestUser._id}
+                >
+                  {approvingRequestId === requestUser._id ? 'Approving...' : 'Accept'}
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+
         {tab === 'media' && (
           <div className="details-media-grid">
             {mediaMessages.length === 0 && (
@@ -518,7 +611,7 @@ function CommunityDetailsPanel({ community, messages, currentUser, onClose, onLe
 }
 
 /* ── Main Component ──────────────────────────────────────────────── */
-export default function CommunityChat({ community, currentUser, onLeave }) {
+export default function CommunityChat({ community, currentUser, onLeave, onCommunityUpdated }) {
   const communityId   = community._id;
   const communityName = community.communityName;
   const communityTag  = community.communityTag;
@@ -533,7 +626,8 @@ export default function CommunityChat({ community, currentUser, onLeave }) {
   const [videoSession,  setVideoSession]  = useState(null);
   const [showDetails,   setShowDetails]   = useState(false);
   const [uploading,     setUploading]     = useState(false);
-  const [attachAccept,  setAttachAccept]  = useState('*');
+  const [attachAccept,  setAttachAccept]  = useState('');
+  const [attachType,    setAttachType]    = useState('file');
 
   const messagesEndRef = useRef(null);
   const inputRef       = useRef(null);
@@ -626,16 +720,33 @@ export default function CommunityChat({ community, currentUser, onLeave }) {
   }, [handleSend]);
 
   /* ── File upload ─────────────────────────────────────────────── */
-  const triggerFileInput = (accept) => {
+  const triggerFileInput = (accept, type) => {
     setAttachAccept(accept);
+    setAttachType(type);
     setShowAttach(false);
-    setTimeout(() => fileInputRef.current?.click(), 0);
+
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+      fileInputRef.current.accept = accept;
+      fileInputRef.current.click();
+    }
   };
 
   const handleFileSelect = useCallback(async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
     e.target.value = '';
+
+    const fileCategory = getFileCategory(file);
+    if (attachType === 'file' && fileCategory !== 'file') {
+      console.warn(`Blocked ${fileCategory} upload from file-only picker.`);
+      return;
+    }
+
+    if (attachType !== 'file' && fileCategory !== attachType) {
+      console.warn(`Blocked ${fileCategory || 'unknown'} upload from ${attachType} picker.`);
+      return;
+    }
 
     setUploading(true);
     try {
@@ -680,9 +791,10 @@ export default function CommunityChat({ community, currentUser, onLeave }) {
       setReplyingTo(null);
     } catch (err) {
       console.error('Upload error:', err);
+    } finally {
+      setUploading(false);
     }
-    setUploading(false);
-  }, [communityId, currentUser, replyingTo]);
+  }, [attachType, communityId, currentUser, replyingTo]);
 
   const handleEmojiClick = useCallback((emoji) => {
     setInputText(prev => prev + emoji);
@@ -699,10 +811,10 @@ export default function CommunityChat({ community, currentUser, onLeave }) {
   }, []);
 
   const ATTACH_OPTIONS = [
-    { icon: '🖼️', label: 'Image', accept: 'image/*' },
-    { icon: '🎬', label: 'Video', accept: 'video/*' },
-    { icon: '🎵', label: 'Audio', accept: 'audio/*' },
-    { icon: '📎', label: 'File',  accept: '*' },
+    { icon: '🖼️', label: 'Image', accept: 'image/*', type: 'image' },
+    { icon: '🎬', label: 'Video', accept: 'video/*', type: 'video' },
+    { icon: '🎵', label: 'Audio', accept: 'audio/*', type: 'audio' },
+    { icon: '📎', label: 'File',  accept: NON_MEDIA_FILE_ACCEPT, type: 'file' },
   ];
 
   return (
@@ -849,7 +961,7 @@ export default function CommunityChat({ community, currentUser, onLeave }) {
                       <button
                         key={opt.label}
                         className="attach-option"
-                        onClick={() => triggerFileInput(opt.accept)}
+                        onClick={() => triggerFileInput(opt.accept, opt.type)}
                       >
                         <span className="attach-option-icon">{opt.icon}</span>
                         {opt.label}
@@ -888,6 +1000,7 @@ export default function CommunityChat({ community, currentUser, onLeave }) {
           currentUser={currentUser}
           onClose={() => setShowDetails(false)}
           onLeave={() => { setShowDetails(false); onLeave?.(); }}
+          onCommunityUpdated={onCommunityUpdated}
         />
       )}
     </div>

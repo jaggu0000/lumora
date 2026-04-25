@@ -11,6 +11,7 @@ import {
 	resolveUserReport,
 	getCommunityReports,
 	resolveCommunityReport,
+	deleteCommunityFromReport,
 } from "../controllers/adminController.js";
 
 const adminRouter = express.Router();
@@ -33,5 +34,6 @@ adminRouter.patch("/user-reports/:reportId/status", resolveUserReport);
 // Community Reports
 adminRouter.get("/community-reports", getCommunityReports);
 adminRouter.patch("/community-reports/:reportId/status", resolveCommunityReport);
+adminRouter.delete("/communities/:communityId", deleteCommunityFromReport);
 
 export default adminRouter;

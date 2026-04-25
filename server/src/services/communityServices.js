@@ -8,13 +8,16 @@ export const fetchCommunityDetails = async (communityId) => {
 		.select("communityName communityTag description members communityAdmin moderators isPrivate membershipMode");
 	if (!community) throw new Error("Community not found");
 
-	// Cross-DB: manually resolve member usernames from userDB
-	const users = await User.find({ _id: { $in: community.members } }, "username");
-	const usersMap = new Map(users.map(u => [u._id.toString(), u.username]));
-	const adminId = community.communityAdmin.toString();
-	const moderatorSet = new Set(community.moderators.map(m => m.toString()));
+	const memberIds = (community.members || []).filter(Boolean);
+	const moderatorIds = (community.moderators || []).filter(Boolean);
 
-	const membersData = community.members.map(id => {
+	// Cross-DB: manually resolve member usernames from userDB
+	const users = await User.find({ _id: { $in: memberIds } }, "username");
+	const usersMap = new Map(users.map(u => [u._id.toString(), u.username]));
+	const adminId = community.communityAdmin?.toString?.() ?? null;
+	const moderatorSet = new Set(moderatorIds.map((moderatorId) => moderatorId.toString()));
+
+	const membersData = memberIds.map(id => {
 		const idStr = id.toString();
 		return {
 			_id: idStr,

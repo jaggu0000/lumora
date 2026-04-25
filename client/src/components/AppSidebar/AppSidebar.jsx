@@ -7,7 +7,7 @@ import '../../pages/Dashboard.css';
 const getInitials = (name = '') =>
   name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
 
-export default function AppSidebar({ selectedCommunityId, onCommunitySelect, onExplore, isOpen, onClose }) {
+export default function AppSidebar({ selectedCommunityId, onCommunitySelect, onExplore, onCreate, isOpen, onClose }) {
   const navigate = useNavigate();
   const [user,              setUser]              = useState(null);
   const [joinedCommunities, setJoinedCommunities] = useState([]);
@@ -99,6 +99,17 @@ export default function AppSidebar({ selectedCommunityId, onCommunitySelect, onE
           <span className="dash-sb-explore-icon">⬡</span>
           Explore Communities
         </motion.button>
+        {onCreate && (
+          <motion.button
+            className="dash-sb-create-btn"
+            onClick={onCreate}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            <span className="dash-sb-explore-icon">＋</span>
+            Create Community
+          </motion.button>
+        )}
       </div>
 
       <div className="dash-sidebar-bottom">

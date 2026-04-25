@@ -4,6 +4,7 @@ import UserReport from "../models/AdminDB/UserReport.js";
 import CommunityReport from "../models/AdminDB/CommunityReport.js";
 import User from "../models/UserDB/User.js";
 import Community from "../models/CommunityDB/Community.js";
+import UserMetadata from "../models/UserDB/UserMetadata.js";
 
 // ── Achievements ──────────────────────────────────────────────────────────────
 
@@ -85,7 +86,15 @@ export const getCommunityReports = async ({ status, page = 1, limit = 20 }) => {
 			.limit(limit),
 		CommunityReport.countDocuments(filter),
 	]);
-	return { reports, total, page, limit };
+	const normalizedReports = reports.map((report) => {
+		const data = report.toObject();
+		return {
+			...data,
+			reportedCommunityId: data.reportedCommunity?._id?.toString?.() || report.reportedCommunity?.toString?.() || "",
+		};
+	});
+
+	return { reports: normalizedReports, total, page, limit };
 };
 
 export const updateCommunityReportStatus = async (reportId, status) => {
@@ -94,4 +103,16 @@ export const updateCommunityReportStatus = async (reportId, status) => {
 	const report = await CommunityReport.findByIdAndUpdate(reportId, update, { new: true });
 	if (!report) throw new Error("Community report not found");
 	return report;
+};
+
+export const deleteReportedCommunity = async (communityId) => {
+	const community = await Community.findByIdAndDelete(communityId);
+	if (!community) throw new Error("Community not found");
+
+	await UserMetadata.updateMany(
+		{ userId: { $in: community.members || [] } },
+		{ $pull: { joinedCommunities: community._id } }
+	);
+
+	return community;
 };

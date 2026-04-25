@@ -1413,6 +1413,27 @@
   border-color: rgba(139,92,246,0.4);
 }
 .dash-sb-explore-icon { font-size: 14px; }
+.dash-sb-create-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 9px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(139,92,246,0.35);
+  background: rgba(139,92,246,0.12);
+  color: #a78bfa;
+  font-size: 12px;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  transition: background 0.2s, border-color 0.2s;
+}
+.dash-sb-create-btn:hover {
+  background: rgba(139,92,246,0.22);
+  border-color: rgba(139,92,246,0.55);
+}
 
 /* ── Hamburger ───────────────────────────────────────────────────── */
 .dash-hamburger {

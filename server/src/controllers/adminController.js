@@ -143,3 +143,14 @@ export const resolveCommunityReport = async (req, res) => {
 		res.status(status).json({ success: false, message: error.message });
 	}
 };
+
+export const deleteCommunityFromReport = async (req, res) => {
+	try {
+		const { communityId } = req.params;
+		const community = await adminService.deleteReportedCommunity(communityId);
+		res.status(200).json({ success: true, data: community, message: "Community deleted successfully" });
+	} catch (error) {
+		const status = error.message === "Community not found" ? 404 : 500;
+		res.status(status).json({ success: false, message: error.message });
+	}
+};

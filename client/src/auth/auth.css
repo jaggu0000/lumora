@@ -282,3 +282,44 @@
   transition: color 0.2s;
 }
 .auth-switch-link:hover { color: #a78bfa; }
+.auth-switch-link:disabled { opacity: 0.5; cursor: default; }
+
+/* ── OTP hint ────────────────────────────────────────────────────── */
+.auth-otp-hint {
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.6;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.auth-otp-hint strong { color: #94a3b8; }
+
+/* ── OTP footer (resend + back links) ───────────────────────────── */
+.auth-otp-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 16px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+/* ── Success banner ──────────────────────────────────────────────── */
+.auth-success-banner {
+  background: rgba(34,197,94,0.1);
+  border: 1px solid rgba(34,197,94,0.3);
+  border-radius: 12px;
+  color: #86efac;
+  font-size: 14px;
+  padding: 20px 14px;
+  margin: 16px 0;
+  text-align: center;
+}
+
+/* ── Forgot button (plain, no underline by default) ─────────────── */
+.auth-forgot {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: 'Outfit', 'DM Sans', 'Inter', sans-serif;
+}
