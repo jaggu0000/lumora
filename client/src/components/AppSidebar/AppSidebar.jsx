@@ -57,7 +57,7 @@ export default function AppSidebar({ selectedCommunityId, onCommunitySelect, onE
       <div className="dash-sb-communities">
         <div className="dash-sb-section-header">
           <span className="dash-sb-section-title">Communities</span>
-          <button className="dash-sb-section-add" onClick={() => navigate('/community')} title="Browse communities">+</button>
+          <button className="dash-sb-section-add" onClick={onExplore ?? (() => navigate('/community'))} title="Browse communities">+</button>
         </div>
         <div className="dash-sb-community-list">
           {joinedCommunities.length === 0 && (
