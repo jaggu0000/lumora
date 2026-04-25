@@ -65,6 +65,7 @@ Current streak: ${streak} day${streak !== 1 ? "s" : ""} (best: ${maxStreak})
 Focus time today: ${todayMinutes} minute${todayMinutes !== 1 ? "s" : ""}
 Pending tasks (${pendingTodos.length}):
 ${pendingList}
+Todays date: ${new Date().toLocaleDateString()}
 Recently completed tasks:
 ${completedList}
 Communities joined: ${communityList}
@@ -95,7 +96,7 @@ router.post("/chat", authenticate, async (req, res) => {
 				"X-Title": "Lumora Focus Coach",
 			},
 			body: JSON.stringify({
-				model: "meta-llama/llama-3.1-8b-instruct:free",
+				model: "openai/gpt-oss-120b:free",
 				messages: [
 					{ role: "system", content: systemPrompt },
 					...messages,
@@ -108,6 +109,7 @@ router.post("/chat", authenticate, async (req, res) => {
 
 		if (!response.ok) {
 			const err = await response.text();
+			console.error(`[AI] OpenRouter error ${response.status}:`, err);
 			return res.status(response.status).json({ error: err });
 		}
 
@@ -146,6 +148,7 @@ router.post("/chat", authenticate, async (req, res) => {
 
 		res.end();
 	} catch (error) {
+		console.error("[AI] Unhandled error:", error);
 		if (!res.headersSent) {
 			res.status(500).json({ error: "AI service error" });
 		}
